@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>دروس Study AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+        }
+
+        header {
+            padding: 25px 15px;
+            text-align: center;
+            background: #1e293b;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        header p {
+            color: #cbd5e1;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1100px;
+            margin: 25px auto;
+        }
+
+        .level {
+            margin-bottom: 40px;
+        }
+
+        .level-title {
+            background: #1e293b;
+            border-right: 5px solid #38bdf8;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 25px;
+            margin-bottom: 20px;
+        }
+
+        .year {
+            margin-bottom: 30px;
+        }
+
+        .year-title {
+            color: #38bdf8;
+            font-size: 21px;
+            margin-bottom: 15px;
+        }
+
+        .books {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 15px;
+        }
+
+        .book {
+            background: #1e293b;
+            border: 1px solid #334155;
+            padding: 18px;
+            border-radius: 12px;
+        }
+
+        .book-name {
+            font-size: 16px;
+            line-height: 1.7;
+            word-break: break-word;
+            margin-bottom: 15px;
+        }
+
+        .open {
+            display: block;
+            padding: 10px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        .open:hover {
+            background: #1d4ed8;
+        }
+
+        .back {
+            display: block;
+            margin: 30px 0;
+            text-align: center;
+            color: #93c5fd;
+            text-decoration: none;
+        }
+
+        .empty {
+            background: #1e293b;
+            padding: 25px;
+            text-align: center;
+            border-radius: 12px;
+            color: #cbd5e1;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>📚 دروس المنهج الموريتاني</h1>
+    <p>جميع الكتب الموجودة في Study AI</p>
+</header>
+
+<div class="container">
+
+    {% if categories %}
+
+        {% for category in categories %}
+
+            <div class="level">
+
+                <div class="level-title">
+                    📚 {{ category.name }}
+                </div>
+
+                {% for year in category.years %}
+
+                    <div class="year">
+
+                        <div class="year-title">
+                            📖 {{ year.name }}
+                        </div>
+
+                        <div class="books">
+
+                            {% for book in year.books %}
+
+                                <div class="book">
+
+                                    <div style="font-size:40px;">
+                                        📕
+                                    </div>
+
+                                    <div class="book-name">
+                                        {{ book.name }}
+                                    </div>
+
+                                    <a
+                                        class="open"
+                                        href="{{ url_for('open_book', filename=book.path) }}"
+                                        target="_blank"
+                                    >
+                                        📖 فتح الكتاب
+                                    </a>
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="empty">
+            لا توجد كتب لعرضها.
+        </div>
+
+    {% endif %}
+
+    <a class="back" href="/">
+        ⬅️ العودة للرئيسية
+    </a>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم الأدمن - Study AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #222;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 35px;
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .admin-card {
+            background: white;
+            border-radius: 18px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: 0.2s;
+        }
+
+        .admin-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .icon {
+            font-size: 45px;
+            margin-bottom: 15px;
+        }
+
+        .admin-card h2 {
+            margin: 10px 0;
+        }
+
+        .admin-card p {
+            color: #666;
+            min-height: 45px;
+        }
+
+        .admin-card a {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 22px;
+            border-radius: 10px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+        }
+
+        .back {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            color: #555;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🛠️ لوحة تحكم الأدمن</h1>
+    <div class="subtitle">
+        إدارة Study AI
+    </div>
+
+    <div class="admin-grid">
+
+        <div class="admin-card">
+            <div class="icon">📊</div>
+            <h2>رفع النتائج</h2>
+            <p>رفع وإدارة نتائج المسابقات والامتحانات.</p>
+            <a href="{{ url_for('admin_results') }}">
+                فتح إدارة النتائج
+            </a>
+        </div>
+
+        <div class="admin-card">
+            <div class="icon">⏳</div>
+            <h2>الإعلانات والعدّ التنازلي</h2>
+            <p>إضافة وحذف الإعلانات والمواعيد المهمة.</p>
+            <a href="{{ url_for('admin_countdown') }}">
+                إدارة الإعلانات
+            </a>
+        </div>
+
+    </div>
+
+    <a class="back" href="{{ '/' }}">
+        ← العودة إلى Study AI
+    </a>
+
+</div>
+
+</body>
+</html>

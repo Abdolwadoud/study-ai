@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Study AI</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #080b14;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+.header {
+    height: 70px;
+    border-bottom: 1px solid #1e293b;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 25px;
+}
+
+.logo {
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.logo span {
+    color: #4f8cff;
+}
+
+.chat {
+    height: calc(100vh - 150px);
+    max-width: 900px;
+
+    margin: auto;
+
+    padding: 30px;
+
+    overflow-y: auto;
+}
+
+.message {
+    display: flex;
+    gap: 15px;
+
+    margin-bottom: 25px;
+
+    padding: 18px;
+
+    border-radius: 18px;
+
+    line-height: 1.8;
+}
+
+.user {
+    background: #111827;
+}
+
+.ai {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+}
+
+.avatar {
+    font-size: 25px;
+}
+
+.input-area {
+    position: fixed;
+
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    padding: 15px;
+
+    background: #080b14;
+
+    border-top: 1px solid #1e293b;
+}
+
+.input-box {
+    max-width: 900px;
+    margin: auto;
+
+    display: flex;
+    gap: 10px;
+
+    background: #111827;
+
+    border: 1px solid #263247;
+
+    padding: 8px;
+
+    border-radius: 16px;
+}
+
+#question {
+    flex: 1;
+
+    background: transparent;
+
+    border: none;
+    outline: none;
+
+    color: white;
+
+    padding: 12px;
+
+    font-size: 16px;
+}
+
+button {
+    border: none;
+
+    background: #4f8cff;
+
+    color: white;
+
+    border-radius: 12px;
+
+    padding: 12px 22px;
+
+    cursor: pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header class="header">
+
+    <div class="logo">
+        Study<span>AI</span>
+    </div>
+
+</header>
+
+
+<div id="chat" class="chat">
+
+    <div class="message ai">
+
+        <div class="avatar">
+            🤖
+        </div>
+
+        <div>
+            مرحبًا! أنا Study AI 👋
+            <br>
+            ما الذي تريد أن تتعلمه اليوم؟
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="input-area">
+
+    <div class="input-box">
+
+        <input
+            id="question"
+            placeholder="اسأل Study AI..."
+            onkeydown="if(event.key === 'Enter') askAI()"
+        >
+
+        <button onclick="askAI()">
+            إرسال
+        </button>
+
+    </div>
+
+</div>
+
+
+<script src="/static/js/app.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,421 @@
+from dotenv import load_dotenv
+load_dotenv()
+
+import os
+import re
+import sqlite3
+import secrets
+import smtplib
+from datetime import datetime, timedelta, timezone
+from email.message import EmailMessage
+
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    session,
+    flash
+)
+
+from werkzeug.security import generate_password_hash, check_password_hash
+
+
+auth = Blueprint("auth", __name__)
+DB_FILE = "users.db"
+
+
+def get_db():
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def init_db():
+    conn = get_db()
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE,
+            phone TEXT UNIQUE,
+            password_hash TEXT NOT NULL,
+            verified INTEGER DEFAULT 0,
+            created_at TEXT NOT NULL
+        )
+    """)
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS otp_codes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            code TEXT NOT NULL,
+            expires_at TEXT NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )
+    """)
+
+    conn.commit()
+    conn.close()
+
+
+def create_otp():
+    return f"{secrets.randbelow(1000000):06d}"
+
+
+def send_email_otp(email, code):
+    smtp_host = os.getenv("SMTP_HOST")
+    smtp_port = int(os.getenv("SMTP_PORT", "587"))
+    smtp_user = os.getenv("SMTP_USER")
+    smtp_password = os.getenv("SMTP_PASSWORD")
+
+    if not all([smtp_host, smtp_user, smtp_password]):
+        return False
+
+    message = EmailMessage()
+    message["Subject"] = "رمز التحقق - Study AI"
+    message["From"] = smtp_user
+    message["To"] = email
+    print("📧 OTP WILL BE SENT TO:", email)
+
+    message.set_content(
+        f"""مرحبًا بك في Study AI.
+
+رمز التحقق الخاص بك هو:
+
+{code}
+
+الرمز صالح لمدة 10 دقائق.
+
+إذا لم تطلب إنشاء هذا الحساب، تجاهل هذه الرسالة.
+"""
+    )
+
+    try:
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=15) as server:
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+            server.login(smtp_user, smtp_password)
+            server.send_message(message)
+
+        print("✅ EMAIL SENT SUCCESSFULLY TO:", email)
+        return True
+
+    except Exception as e:
+        print("❌ EMAIL OTP ERROR:", type(e).__name__, str(e))
+        return False
+
+
+def send_sms_otp(phone, code):
+    return False
+
+
+def send_otp(user_id, email=None, phone=None):
+    code = create_otp()
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+
+    conn = get_db()
+
+    conn.execute(
+        "DELETE FROM otp_codes WHERE user_id = ?",
+        (user_id,)
+    )
+
+    conn.execute(
+        """
+        INSERT INTO otp_codes
+        (user_id, code, expires_at)
+        VALUES (?, ?, ?)
+        """,
+        (user_id, code, expires_at.isoformat())
+    )
+
+    conn.commit()
+    conn.close()
+
+    if email:
+        return send_email_otp(email, code)
+
+    if phone:
+        return send_sms_otp(phone, code)
+
+    return False
+
+
+# =========================
+# التسجيل
+# =========================
+
+@auth.route("/register", methods=["GET", "POST"])
+def register():
+
+    if request.method == "GET":
+        return render_template("register.html")
+
+    email = request.form.get("email", "").strip().lower()
+    phone = request.form.get("phone", "").strip()
+    password = request.form.get("password", "")
+
+    if not email and not phone:
+        flash("أدخل البريد الإلكتروني أو رقم الهاتف.")
+        return redirect(url_for("auth.register"))
+
+    if len(password) < 8:
+        flash("كلمة المرور يجب أن تكون 8 أحرف على الأقل.")
+        return redirect(url_for("auth.register"))
+
+    if email and not re.match(
+        r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+        email
+    ):
+        flash("البريد الإلكتروني غير صحيح.")
+        return redirect(url_for("auth.register"))
+
+    conn = get_db()
+
+    if email:
+        existing = conn.execute(
+            "SELECT id FROM users WHERE email = ?",
+            (email,)
+        ).fetchone()
+    else:
+        existing = conn.execute(
+            "SELECT id FROM users WHERE phone = ?",
+            (phone,)
+        ).fetchone()
+
+    if existing:
+        conn.close()
+        flash("هذا الحساب موجود بالفعل.")
+        return redirect(url_for("auth.login"))
+
+    cursor = conn.execute(
+        """
+        INSERT INTO users
+        (email, phone, password_hash, verified, created_at)
+        VALUES (?, ?, ?, 0, ?)
+        """,
+        (
+            email or None,
+            phone or None,
+            generate_password_hash(password),
+            datetime.now(timezone.utc).isoformat()
+        )
+    )
+
+    user_id = cursor.lastrowid
+
+    conn.commit()
+    conn.close()
+
+    sent = send_otp(
+        user_id,
+        email=email or None,
+        phone=phone or None
+    )
+
+    if not sent:
+        flash("تعذر إرسال رمز التحقق. تحقق من إعدادات البريد.")
+
+    session["verify_user_id"] = user_id
+
+    return redirect(url_for("auth.verify"))
+
+
+# =========================
+# التحقق من OTP
+# =========================
+
+@auth.route("/verify", methods=["GET", "POST"])
+def verify():
+
+    user_id = session.get("verify_user_id")
+
+    if not user_id:
+        return redirect(url_for("auth.register"))
+
+    if request.method == "GET":
+        return render_template("verify.html")
+
+    code = request.form.get("code", "").strip()
+
+    conn = get_db()
+
+    otp = conn.execute(
+        """
+        SELECT *
+        FROM otp_codes
+        WHERE user_id = ?
+        ORDER BY id DESC
+        LIMIT 1
+        """,
+        (user_id,)
+    ).fetchone()
+
+    if not otp:
+        conn.close()
+        flash("رمز التحقق غير موجود.")
+        return redirect(url_for("auth.verify"))
+
+    expires_at = datetime.fromisoformat(otp["expires_at"])
+
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+
+    if datetime.now(timezone.utc) > expires_at:
+        conn.close()
+        flash("انتهت صلاحية الرمز. اطلب رمزًا جديدًا.")
+        return redirect(url_for("auth.verify"))
+
+    if not secrets.compare_digest(code, otp["code"]):
+        conn.close()
+        flash("رمز التحقق غير صحيح.")
+        return redirect(url_for("auth.verify"))
+
+    conn.execute(
+        "UPDATE users SET verified = 1 WHERE id = ?",
+        (user_id,)
+    )
+
+    conn.execute(
+        "DELETE FROM otp_codes WHERE user_id = ?",
+        (user_id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    session.pop("verify_user_id", None)
+    session["user_id"] = user_id
+
+    return redirect(url_for("auth.account"))
+
+
+# =========================
+# تسجيل الدخول
+# =========================
+
+@auth.route("/login", methods=["GET", "POST"])
+def login():
+
+    if request.method == "GET":
+        return render_template("login.html")
+
+    identity = request.form.get("identity", "").strip().lower()
+    password = request.form.get("password", "")
+
+    conn = get_db()
+
+    user = conn.execute(
+        """
+        SELECT *
+        FROM users
+        WHERE email = ?
+           OR phone = ?
+        """,
+        (identity, identity)
+    ).fetchone()
+
+    conn.close()
+
+    if not user:
+        flash("البريد أو رقم الهاتف غير موجود.")
+        return redirect(url_for("auth.login"))
+
+    if not check_password_hash(
+        user["password_hash"],
+        password
+    ):
+        flash("كلمة المرور غير صحيحة.")
+        return redirect(url_for("auth.login"))
+
+    if not user["verified"]:
+        session["verify_user_id"] = user["id"]
+
+        sent = send_otp(
+            user["id"],
+            email=user["email"],
+            phone=user["phone"]
+        )
+
+        if sent:
+            flash("تم إرسال رمز التحقق إلى بريدك الإلكتروني.")
+        else:
+            flash("تعذر إرسال رمز التحقق. تحقق من إعدادات البريد.")
+
+        return redirect(url_for("auth.verify"))
+
+    session["user_id"] = user["id"]
+
+    return redirect(url_for("auth.account"))
+
+
+# =========================
+# الدخول كزائر
+# =========================
+
+@auth.route("/guest")
+def guest():
+    session.clear()
+    session["guest"] = True
+    return redirect(url_for("home"))
+
+
+# =========================
+# الحساب
+# =========================
+
+@auth.route("/account")
+def account():
+
+    user_id = session.get("user_id")
+
+    if not user_id:
+        return redirect(url_for("auth.login"))
+
+    conn = get_db()
+
+    user = conn.execute(
+        """
+        SELECT id, email, phone, verified, is_admin
+        FROM users
+        WHERE id = ?
+        """,
+        (user_id,)
+    ).fetchone()
+
+    conn.close()
+
+    if not user:
+        session.clear()
+        return redirect(url_for("auth.login"))
+
+    return render_template(
+        "account.html",
+        user=user
+    )
+    if not user:
+        session.clear()
+        return redirect(url_for("auth.login"))
+
+    return render_template(
+        "account.html",
+        user=user
+    )
+
+
+# =========================
+# تسجيل الخروج
+# =========================
+
+@auth.route("/logout")
+def logout():
+
+    session.clear()
+
+    return redirect(url_for("auth.login"))
+
+
+init_db()

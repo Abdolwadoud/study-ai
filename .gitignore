@@ -1,0 +1,41 @@
+__pycache__/
+*.pyc
+.env
+.venv/
+venv/
+env/
+.DS_Store
+*.log
+
+# Local databases
+*.db
+
+# Curriculum files and extracted book text
+books/
+book_texts/
+
+# Temporary/local files
+books_temp/
+*_backup.py
+*.bak
+
+# Local curriculum/data
+books/
+book_texts/
+books_temp/
+
+# Local databases
+*.db
+
+# Backup files
+*.bak
+*_backup.py
+
+# Old/broken template copies
+templates/*.htm
+templates/*backup*.html
+templates/*before_fix*.html
+
+templates/*.htm
+templates/*backup*.html
+templates/*before_fix*.html

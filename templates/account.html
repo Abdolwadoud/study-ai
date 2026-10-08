@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حسابي - Study AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #0b1020;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .box {
+            width: 90%;
+            max-width: 500px;
+            background: #151c32;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,.4);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .info {
+            background: #0e1528;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .label {
+            color: #8993ad;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .value {
+            font-size: 17px;
+            word-break: break-word;
+        }
+
+        .verified {
+            color: #4ade80;
+        }
+
+        .logout {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            padding: 14px;
+            border-radius: 10px;
+            background: #dc3545;
+            color: white;
+            text-decoration: none;
+        }
+
+        .home {
+            display: block;
+            text-align: center;
+            margin-top: 12px;
+            color: #7da2ff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="box">
+
+    <h1>👤 حسابي</h1>
+
+    <div class="info">
+        <div class="label">البريد الإلكتروني</div>
+        <div class="value">
+            {{ user["email"] or "غير مضاف" }}
+        </div>
+    </div>
+
+    <div class="info">
+        <div class="label">رقم الهاتف</div>
+        <div class="value">
+            {{ user["phone"] or "غير مضاف" }}
+        </div>
+    </div>
+
+    <div class="info">
+        <div class="label">حالة الحساب</div>
+        <div class="value verified">
+            ✓ الحساب موثّق
+        </div>
+    </div>
+{% if user["is_admin"] %}
+<a class="admin" href="{{ url_for('admin_dashboard') }}">
+    🛠️ لوحة تحكم الأدمن
+</a>
+{% endif %}
+        تسجيل الخروج
+    </a>
+
+    <a class="home" href="/">
+        العودة إلى Study AI
+    </a>
+
+</div>
+
+</body>
+</html>

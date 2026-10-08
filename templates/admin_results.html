@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة النتائج - Study AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 5px 25px rgba(0,0,0,.08);
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #222;
+        }
+
+        p {
+            color: #666;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 15px;
+            margin: 20px 0;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: 0;
+            border-radius: 10px;
+            background: #2563eb;
+            color: white;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .back {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .message {
+            padding: 12px;
+            background: #eef6ff;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>⚙️ إدارة النتائج</h1>
+
+    <p>
+        هذه الصفحة خاصة بالمشرف. يمكنك من خلالها رفع ملف CSV
+        يحتوي على نتائج المترشحين.
+    </p>
+
+    {% if message %}
+        <div class="message">
+            {{ message }}
+        </div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data">
+
+        <input
+            type="file"
+            name="results_file"
+            accept=".csv"
+            required
+        >
+
+        <button type="submit">
+            📤 رفع النتائج
+        </button>
+
+    </form>
+
+    <a class="back" href="/results">
+        ← العودة إلى صفحة النتائج
+    </a>
+
+</div>
+
+</body>
+</html>

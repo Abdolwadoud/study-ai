@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title id="pageTitle">الإعدادات - Study AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #222;
+            transition: .3s;
+        }
+
+        body.dark {
+            background: #111827;
+            color: #f3f4f6;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .back {
+            display: inline-block;
+            margin-bottom: 15px;
+            color: #4f46e5;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        body.dark .back {
+            color: #a5b4fc;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,.06);
+            transition: .3s;
+        }
+
+        body.dark .card {
+            background: #1f2937;
+            box-shadow: 0 4px 15px rgba(0,0,0,.3);
+        }
+
+        .card h2 {
+            font-size: 19px;
+            margin-bottom: 15px;
+        }
+
+        .setting {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        body.dark .setting {
+            border-bottom-color: #374151;
+        }
+
+        .setting:last-child {
+            border-bottom: none;
+        }
+
+        .setting-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .setting-title {
+            font-weight: bold;
+        }
+
+        .setting-description {
+            font-size: 13px;
+            color: #777;
+        }
+
+        body.dark .setting-description {
+            color: #9ca3af;
+        }
+
+        select {
+            padding: 9px 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            color: #222;
+            font-size: 14px;
+        }
+
+        body.dark select {
+            background: #374151;
+            color: white;
+            border-color: #4b5563;
+        }
+
+        .switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+        }
+
+        .switch input {
+            display: none;
+        }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+            background: #ccc;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: .3s;
+        }
+
+        .slider:before {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: 3px;
+            top: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: .3s;
+        }
+
+        input:checked + .slider {
+            background: #4f46e5;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        .account-link {
+            color: #4f46e5;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        body.dark .account-link {
+            color: #a5b4fc;
+        }
+
+        .logout {
+            color: #dc2626;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            color: #888;
+            font-size: 13px;
+            margin-top: 25px;
+        }
+
+        body.dark .footer {
+            color: #9ca3af;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <a href="/" class="back" id="backButton">← العودة للرئيسية</a>
+
+    <div class="header">
+        <h1 id="settingsTitle">⚙️ الإعدادات</h1>
+        <p id="settingsDescription">
+            إدارة إعدادات حسابك في Study AI
+        </p>
+    </div>
+
+    <div class="card">
+
+        <h2 id="appearanceTitle">🎨 المظهر</h2>
+
+        <div class="setting">
+
+            <div class="setting-info">
+                <span class="setting-title" id="darkTitle">
+                    الوضع الليلي
+                </span>
+
+                <span class="setting-description" id="darkDescription">
+                    تفعيل الوضع الليلي للموقع
+                </span>
+            </div>
+
+            <label class="switch">
+                <input type="checkbox" id="darkMode">
+                <span class="slider"></span>
+            </label>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2 id="languageTitle">🌐 اللغة</h2>
+
+        <div class="setting">
+
+            <div class="setting-info">
+                <span class="setting-title" id="languageName">
+                    لغة الموقع
+                </span>
+
+                <span class="setting-description" id="languageDescription">
+                    اختر لغة الموقع
+                </span>
+            </div>
+
+            <select id="language">
+
+                <option value="ar">العربية</option>
+
+                <option value="en">English</option>
+
+                <option value="fr">Français</option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2 id="notificationsTitle">🔔 الإشعارات</h2>
+
+        <div class="setting">
+
+            <div class="setting-info">
+
+                <span class="setting-title" id="notificationsName">
+                    إشعارات الدراسة
+                </span>
+
+                <span class="setting-description" id="notificationsDescription">
+                    تفعيل تذكيرات الدراسة والاختبارات
+                </span>
+
+            </div>
+
+            <label class="switch">
+
+                <input
+                    type="checkbox"
+                    id="notifications"
+                    checked
+                >
+
+                <span class="slider"></span>
+
+            </label>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2 id="accountTitle">👤 الحساب</h2>
+
+        <div class="setting">
+
+            <div class="setting-info">
+
+                <span class="setting-title" id="accountName">
+                    معلومات الحساب
+                </span>
+
+                <span class="setting-description" id="accountDescription">
+                    إدارة معلومات حسابك الشخصي
+                </span>
+
+            </div>
+
+            <a href="/account"
+               class="account-link"
+               id="accountButton">
+                فتح
+            </a>
+
+        </div>
+
+
+        <div class="setting">
+
+            <div class="setting-info">
+
+                <span class="setting-title" id="logoutName">
+                    تسجيل الخروج
+                </span>
+
+                <span class="setting-description" id="logoutDescription">
+                    الخروج من حسابك الحالي
+                </span>
+
+            </div>
+
+            <a href="/logout"
+               class="logout"
+               id="logoutButton">
+                خروج
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer">
+        Study AI © 2026
+    </div>
+
+</div>
+
+
+<script>
+
+const darkMode =
+    document.getElementById("darkMode");
+
+const language =
+    document.getElementById("language");
+
+const notifications =
+    document.getElementById("notifications");
+
+
+/* =========================
+   الوضع الليلي
+========================= */
+
+function applyDarkMode() {
+
+    if (darkMode.checked) {
+
+        document.body.classList.add("dark");
+
+        localStorage.setItem(
+            "darkMode",
+            "true"
+        );
+
+    } else {
+
+        document.body.classList.remove("dark");
+
+        localStorage.setItem(
+            "darkMode",
+            "false"
+        );
+    }
+}
+
+
+darkMode.checked =
+    localStorage.getItem("darkMode") === "true";
+
+applyDarkMode();
+
+
+darkMode.addEventListener(
+    "change",
+    applyDarkMode
+);
+
+
+/* =========================
+   الإشعارات
+========================= */
+
+notifications.checked =
+    localStorage.getItem("notifications") !== "false";
+
+
+notifications.addEventListener(
+    "change",
+    function () {
+
+        localStorage.setItem(
+            "notifications",
+            this.checked ? "true" : "false"
+        );
+
+    }
+);
+
+
+/* =========================
+   اللغات
+========================= */
+
+const translations = {
+
+    ar: {
+
+        direction: "rtl",
+
+        title: "الإعدادات - Study AI",
+
+        back: "← العودة للرئيسية",
+
+        settingsTitle: "⚙️ الإعدادات",
+
+        settingsDescription:
+            "إدارة إعدادات حسابك في Study AI",
+
+        appearanceTitle:
+            "🎨 المظهر",
+
+        darkTitle:
+            "الوضع الليلي",
+
+        darkDescription:
+            "تفعيل الوضع الليلي للموقع",
+
+        languageTitle:
+            "🌐 اللغة",
+
+        languageName:
+            "لغة الموقع",
+
+        languageDescription:
+            "اختر لغة الموقع",
+
+        notificationsTitle:
+            "🔔 الإشعارات",
+
+        notificationsName:
+            "إشعارات الدراسة",
+
+        notificationsDescription:
+            "تفعيل تذكيرات الدراسة والاختبارات",
+
+        accountTitle:
+            "👤 الحساب",
+
+        accountName:
+            "معلومات الحساب",
+
+        accountDescription:
+            "إدارة معلومات حسابك الشخصي",
+
+        accountButton:
+            "فتح",
+
+        logoutName:
+            "تسجيل الخروج",
+
+        logoutDescription:
+            "الخروج من حسابك الحالي",
+
+        logoutButton:
+            "خروج"
+    },
+
+
+    en: {
+
+        direction: "ltr",
+
+        title: "Settings - Study AI",
+
+        back: "Back to home →",
+
+        settingsTitle: "⚙️ Settings",
+
+        settingsDescription:
+            "Manage your Study AI account settings",
+
+        appearanceTitle:
+            "🎨 Appearance",
+
+        darkTitle:
+            "Dark mode",
+
+        darkDescription:
+            "Enable dark mode",
+
+        languageTitle:
+            "🌐 Language",
+
+        languageName:
+            "Website language",
+
+        languageDescription:
+            "Choose your website language",
+
+        notificationsTitle:
+            "🔔 Notifications",
+
+        notificationsName:
+            "Study notifications",
+
+        notificationsDescription:
+            "Enable study and quiz reminders",
+
+        accountTitle:
+            "👤 Account",
+
+        accountName:
+            "Account information",
+
+        accountDescription:
+            "Manage your personal account information",
+
+        accountButton:
+            "Open",
+
+        logoutName:
+            "Log out",
+
+        logoutDescription:
+            "Log out of your current account",
+
+        logoutButton:
+            "Log out"
+    },
+
+
+    fr: {
+
+        direction: "ltr",
+
+        title: "Paramètres - Study AI",
+
+        back: "Retour à l'accueil →",
+
+        settingsTitle: "⚙️ Paramètres",
+
+        settingsDescription:
+            "Gérez les paramètres de votre compte Study AI",
+
+        appearanceTitle:
+            "🎨 Apparence",
+
+        darkTitle:
+            "Mode sombre",
+
+        darkDescription:
+            "Activer le mode sombre",
+
+        languageTitle:
+            "🌐 Langue",
+
+        languageName:
+            "Langue du site",
+
+        languageDescription:
+            "Choisissez la langue du site",
+
+        notificationsTitle:
+            "🔔 Notifications",
+
+        notificationsName:
+            "Notifications d'étude",
+
+        notificationsDescription:
+            "Activer les rappels d'étude et de quiz",
+
+        accountTitle:
+            "👤 Compte",
+
+        accountName:
+            "Informations du compte",
+
+        accountDescription:
+            "Gérer les informations de votre compte",
+
+        accountButton:
+            "Ouvrir",
+
+        logoutName:
+            "Déconnexion",
+
+        logoutDescription:
+            "Se déconnecter de votre compte",
+
+        logoutButton:
+            "Déconnexion"
+    }
+
+};
+
+
+/* =========================
+   تطبيق اللغة
+========================= */
+
+function applyLanguage() {
+
+    const lang =
+        language.value;
+
+    const t =
+        translations[lang];
+
+    document.documentElement.lang =
+        lang;
+
+    document.documentElement.dir =
+        t.direction;
+
+    document.getElementById(
+        "pageTitle"
+    ).textContent = t.title;
+
+    document.getElementById(
+        "backButton"
+    ).textContent = t.back;
+
+    document.getElementById(
+        "settingsTitle"
+    ).textContent = t.settingsTitle;
+
+    document.getElementById(
+        "settingsDescription"
+    ).textContent =
+        t.settingsDescription;
+
+    document.getElementById(
+        "appearanceTitle"
+    ).textContent =
+        t.appearanceTitle;
+
+    document.getElementById(
+        "darkTitle"
+    ).textContent =
+        t.darkTitle;
+
+    document.getElementById(
+        "darkDescription"
+    ).textContent =
+        t.darkDescription;
+
+    document.getElementById(
+        "languageTitle"
+    ).textContent =
+        t.languageTitle;
+
+    document.getElementById(
+        "languageName"
+    ).textContent =
+        t.languageName;
+
+    document.getElementById(
+        "languageDescription"
+    ).textContent =
+        t.languageDescription;
+
+    document.getElementById(
+        "notificationsTitle"
+    ).textContent =
+        t.notificationsTitle;
+
+    document.getElementById(
+        "notificationsName"
+    ).textContent =
+        t.notificationsName;
+
+    document.getElementById(
+        "notificationsDescription"
+    ).textContent =
+        t.notificationsDescription;
+
+    document.getElementById(
+        "accountTitle"
+    ).textContent =
+        t.accountTitle;
+
+    document.getElementById(
+        "accountName"
+    ).textContent =
+        t.accountName;
+
+    document.getElementById(
+        "accountDescription"
+    ).textContent =
+        t.accountDescription;
+
+    document.getElementById(
+        "accountButton"
+    ).textContent =
+        t.accountButton;
+
+    document.getElementById(
+        "logoutName"
+    ).textContent =
+        t.logoutName;
+
+    document.getElementById(
+        "logoutDescription"
+    ).textContent =
+        t.logoutDescription;
+
+    document.getElementById(
+        "logoutButton"
+    ).textContent =
+        t.logoutButton;
+
+    localStorage.setItem(
+        "language",
+        lang
+    );
+}
+
+
+/* استعادة اللغة */
+
+const savedLanguage =
+    localStorage.getItem("language");
+
+if (savedLanguage &&
+    translations[savedLanguage]) {
+
+    language.value =
+        savedLanguage;
+}
+
+applyLanguage();
+
+
+language.addEventListener(
+    "change",
+    applyLanguage
+);
+
+</script>
+
+</body>
+</html>

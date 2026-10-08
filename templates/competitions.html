@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المسابقات الموريتانية - Study AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #101827;
+            color: white;
+        }
+
+        .container {
+            width: min(100% - 30px, 900px);
+            margin: auto;
+            padding: 30px 0 50px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #b8c3d6;
+            font-size: 17px;
+        }
+
+        .countdown-box {
+            background: linear-gradient(135deg, #1d4ed8, #2563eb);
+            border-radius: 22px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.25);
+        }
+
+        .countdown-title {
+            font-size: 22px;
+            margin-bottom: 18px;
+        }
+
+        .countdown {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .time {
+            background: rgba(255,255,255,.15);
+            border-radius: 14px;
+            padding: 15px 5px;
+        }
+
+        .time strong {
+            display: block;
+            font-size: 28px;
+        }
+
+        .time span {
+            font-size: 13px;
+            color: #dbeafe;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 18px;
+        }
+
+        .card {
+            background: #1d293d;
+            border: 1px solid #2c3b55;
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            transition: .2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: #3b82f6;
+        }
+
+        .icon {
+            font-size: 42px;
+            margin-bottom: 12px;
+        }
+
+        .card h2 {
+            font-size: 21px;
+            margin: 8px 0;
+        }
+
+        .card p {
+            color: #b8c3d6;
+            line-height: 1.7;
+        }
+
+        button {
+            border: 0;
+            background: #2563eb;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .back {
+            display: block;
+            text-align: center;
+            color: #93c5fd;
+            margin-top: 30px;
+            text-decoration: none;
+            font-size: 17px;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 27px;
+            }
+
+            .countdown {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>🇲🇷 المسابقات الموريتانية</h1>
+        <p>استعد لمسابقاتك التعليمية مع Study AI</p>
+    </div>
+
+    <div class="countdown-box">
+        <div class="countdown-title">
+            ⏳ العد التنازلي للمسابقة القادمة
+        </div>
+
+        <div class="countdown">
+            <div class="time">
+                <strong id="days">00</strong>
+                <span>يوم</span>
+            </div>
+
+            <div class="time">
+                <strong id="hours">00</strong>
+                <span>ساعة</span>
+            </div>
+
+            <div class="time">
+                <strong id="minutes">00</strong>
+                <span>دقيقة</span>
+            </div>
+
+            <div class="time">
+                <strong id="seconds">00</strong>
+                <span>ثانية</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="cards">
+
+        <div class="card">
+            <div class="icon">🏆</div>
+            <h2>مسابقة البكالوريا</h2>
+            <p>التدرب على مواد البكالوريا ومحاكاة الاختبار.</p>
+        </div>
+
+        <div class="card">
+            <div class="icon">🏫</div>
+            <h2>مسابقة ختم الدروس الإعدادية</h2>
+            <p>اختبارات ومراجعة للتحضير للمسابقة.</p>
+<button onclick="location.href='/results'">عرض النتائج</button>
+        </div>
+
+        <div class="card">
+            <div class="icon">📚</div>
+            <h2>مسابقة دخول السنة الأولى إعدادية</h2>
+            <p>تدريب الطلاب على نمط المسابقة.</p>
+            <button onclick="comingSoon()">ابدأ التدريب</button>
+        </div>
+
+        <div class="card">
+            <div class="icon">📝</div>
+            <h2>مواضيع السنوات السابقة</h2>
+            <p>الوصول إلى مواضيع المسابقات السابقة للتدرب عليها.</p>
+            <button onclick="location.href='/past-papers'">عرض المواضيع</button>
+        </div>
+
+        <div class="card">
+            <div class="icon">⏱️</div>
+            <h2>اختبارات محاكاة</h2>
+            <p>اختبار بوقت محدد يحاكي المسابقة الحقيقية.</p>
+            <button onclick="comingSoon()">بدء المحاكاة</button>
+        </div>
+
+        <div class="card">
+            <div class="icon">📊</div>
+            <h2>النتيجة والتصحيح</h2>
+            <p>شاهد نتيجتك وتصحيح إجاباتك بعد انتهاء الاختبار.</p>
+            <button onclick="comingSoon()">عرض النتائج</button>
+        </div>
+
+    </div>
+
+    <a class="back" href="/">
+        🏠 العودة إلى الصفحة الرئيسية
+    </a>
+
+</div>
+
+<script>
+    /*
+      غيّر هذا التاريخ لاحقًا إلى التاريخ الرسمي للمسابقة.
+      الصيغة:
+      YYYY-MM-DDTHH:MM:SS
+    */
+    const competitionDate = new Date("2027-06-01T08:00:00").getTime();
+
+    function updateCountdown() {
+        const now = new Date().getTime();
+        const difference = competitionDate - now;
+
+        if (difference <= 0) {
+            document.getElementById("days").textContent = "00";
+            document.getElementById("hours").textContent = "00";
+            document.getElementById("minutes").textContent = "00";
+            document.getElementById("seconds").textContent = "00";
+            return;
+        }
+
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor(
+            (difference / (1000 * 60 * 60)) % 24
+        );
+        const minutes = Math.floor(
+            (difference / (1000 * 60)) % 60
+        );
+        const seconds = Math.floor(
+            (difference / 1000) % 60
+        );
+
+        document.getElementById("days").textContent =
+            String(days).padStart(2, "0");
+
+        document.getElementById("hours").textContent =
+            String(hours).padStart(2, "0");
+
+        document.getElementById("minutes").textContent =
+            String(minutes).padStart(2, "0");
+
+        document.getElementById("seconds").textContent =
+            String(seconds).padStart(2, "0");
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    function comingSoon() {
+        alert("🚧 هذا القسم قيد التجهيز وسيتم إضافة محتوى المسابقات قريبًا.");
+    }
+</script>
+
+</body>
+</html>

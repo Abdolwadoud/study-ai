@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الإعلانات - Study AI</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            margin: 0;
+            padding: 25px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+
+        .box, .announcement {
+            background: white;
+            padding: 22px;
+            margin-bottom: 20px;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,.08);
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 13px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            margin-top: 18px;
+            border: 0;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .add {
+            background: #2563eb;
+            color: white;
+        }
+
+        .delete {
+            background: #dc2626;
+            color: white;
+        }
+
+        .announcement h3 {
+            margin-top: 0;
+        }
+
+        .date {
+            color: #555;
+        }
+
+        .empty {
+            text-align: center;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>📢 إدارة الإعلانات والعدّ التنازلي</h1>
+
+    <div class="box">
+
+        <h2>➕ إضافة إعلان جديد</h2>
+
+        <form method="POST">
+
+            <label>عنوان الإعلان</label>
+
+            <input
+                type="text"
+                name="title"
+                placeholder="مثال: إعلان نتائج البكالوريا"
+                required
+            >
+
+            <label>التاريخ والوقت</label>
+
+            <input
+                type="datetime-local"
+                name="target_datetime"
+                required
+            >
+
+            <button class="add" type="submit">
+                📢 نشر إعلان جديد
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <h2>📋 الإعلانات الحالية</h2>
+
+    {% if countdowns %}
+
+        {% for item in countdowns %}
+
+        <div class="announcement">
+
+            <h3>{{ item.title }}</h3>
+
+            <div class="date">
+                📅 الموعد: {{ item.target_datetime }}
+            </div>
+
+            <form
+                method="POST"
+                action="{{ url_for('admin_countdown_delete', countdown_id=item.id) }}"
+            >
+
+                <button class="delete" type="submit">
+                    🗑️ حذف هذا الإعلان
+                </button>
+
+            </form>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="box empty">
+            لا توجد إعلانات حاليًا.
+        </div>
+
+    {% endif %}
+
+</div>
+
+</body>
+</html>

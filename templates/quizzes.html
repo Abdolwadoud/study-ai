@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الاختبارات - Study AI</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#0f172a;
+    color:white;
+}
+
+header{
+    text-align:center;
+    padding:30px 20px;
+    background:#1e293b;
+}
+
+header h1{margin:0 0 10px}
+header p{color:#cbd5e1}
+
+.container{
+    max-width:850px;
+    margin:auto;
+    padding:25px 15px;
+}
+
+.panel{
+    background:#1e293b;
+    padding:25px;
+    border-radius:18px;
+    margin-bottom:20px;
+}
+
+label{
+    display:block;
+    margin:16px 0 7px;
+    font-weight:bold;
+}
+
+select{
+    width:100%;
+    padding:13px;
+    border:0;
+    border-radius:10px;
+    font-size:16px;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    margin-top:15px;
+    border:0;
+    border-radius:12px;
+    background:#2563eb;
+    color:white;
+    font-size:17px;
+    cursor:pointer;
+}
+
+button:hover{background:#1d4ed8}
+
+#quiz,#result{display:none}
+
+.question-box{
+    background:#334155;
+    padding:22px;
+    border-radius:15px;
+}
+
+.question-number{
+    color:#93c5fd;
+    margin-bottom:10px;
+}
+
+.difficulty{
+    display:inline-block;
+    background:#475569;
+    padding:7px 12px;
+    border-radius:20px;
+    margin-bottom:15px;
+}
+
+.question-text{
+    font-size:21px;
+    line-height:1.7;
+    margin-bottom:15px;
+}
+
+.option{
+    text-align:right;
+    background:#475569;
+}
+
+.option:hover{background:#64748b}
+
+.score{
+    text-align:center;
+    font-size:48px;
+    font-weight:bold;
+    margin:25px 0;
+}
+
+.result-message{
+    text-align:center;
+    font-size:20px;
+}
+
+.notice{
+    display:none;
+    margin-top:15px;
+    padding:12px;
+    border-radius:10px;
+    background:#7f1d1d;
+    color:#fecaca;
+}
+
+.back{
+    display:block;
+    text-align:center;
+    color:#93c5fd;
+    text-decoration:none;
+    margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>📝 الاختبارات</h1>
+<p>اختبر معلوماتك حسب المرحلة والمستوى والمادة والفصل</p>
+</header>
+
+<div class="container">
+
+<div id="setup" class="panel">
+
+<h2>🎯 إعداد الاختبار</h2>
+
+<label>المرحلة</label>
+<select id="levelType" onchange="updateLevels()">
+<option value="primary">🏫 الابتدائي</option>
+<option value="middle">📘 الإعدادي</option>
+<option value="secondary">🎓 الثانوي</option>
+</select>
+
+<label>المستوى</label>
+<select id="level" onchange="updateSubjects()"></select>
+
+<label>المادة</label>
+<select id="subject"></select>
+
+<label>الفصل</label>
+<select id="term">
+<option value="1">الفصل الأول — سهل 🟢</option>
+<option value="2">الفصل الثاني — متوسط 🟡</option>
+<option value="3">الفصل الثالث — صعب 🔴</option>
+</select>
+
+<label>عدد الأسئلة</label>
+<select id="questionCount">
+<option value="5">5 أسئلة</option>
+<option value="10">10 أسئلة</option>
+<option value="15">15 سؤالًا</option>
+</select>
+<button onclick="startQuiz()">🚀 بدء الاختبار</button>
+
+<div id="notice" class="notice"></div>
+
+</div>
+
+
+<div id="quiz" class="panel">
+
+<div class="question-box">
+
+<div id="questionNumber" class="question-number"></div>
+
+<div id="difficulty" class="difficulty"></div>
+
+<div id="questionText" class="question-text"></div>
+
+<div id="options"></div>
+
+</div>
+
+</div>
+
+
+<div id="result" class="panel">
+
+<h2 style="text-align:center">🎉 انتهى الاختبار</h2>
+
+<div id="score" class="score">0 / 20</div>
+
+<div id="resultMessage" class="result-message"></div>
+
+<button onclick="restartQuiz()">🔄 اختبار جديد</button>
+
+</div>
+
+<a class="back" href="/">🏠 العودة إلى الصفحة الرئيسية</a>
+
+</div>
+
+
+<script>
+
+const levels={
+primary:[
+["1","السنة الأولى"],
+["2","السنة الثانية"],
+["3","السنة الثالثة"],
+["4","السنة الرابعة"],
+["5","السنة الخامسة"],
+["6","السنة السادسة"]
+],
+middle:[
+["1","السنة الأولى الإعدادية"],
+["2","السنة الثانية الإعدادية"],
+["3","السنة الثالثة الإعدادية"],
+["4","السنة الرابعة الإعدادية"]
+],
+secondary:[
+["5","السنة الخامسة الثانوية"],
+["6","السنة السادسة الثانوية"],
+["7","السنة السابعة الثانوية"]
+]
+};
+
+
+const subjects={
+primary:[
+["math","الرياضيات"],
+["arabic","اللغة العربية"],
+["french","اللغة الفرنسية"],
+["science","العلوم"],
+["history","التاريخ"],
+["geography","الجغرافيا"],
+["islamic","التربية الإسلامية"],
+["civics","التربية المدنية"]
+],
+middle:[
+["math","الرياضيات"],
+["arabic","اللغة العربية"],
+["french","اللغة الفرنسية"],
+["english","اللغة الإنجليزية"],
+["science","العلوم الطبيعية"],
+["history","التاريخ"],
+["geography","الجغرافيا"],
+["islamic","التربية الإسلامية"],
+["civics","التربية المدنية"],
+["physics","الفيزياء"]
+],
+secondary:[
+["math","الرياضيات"],
+["arabic","اللغة العربية"],
+["french","اللغة الفرنسية"],
+["english","اللغة الإنجليزية"],
+["physics","الفيزياء"],
+["chemistry","الكيمياء"],
+["philosophy","الفلسفة"],
+["islamic","التربية الإسلامية"],
+["fiqh","الفقه والأصول"],
+["history","التاريخ"],
+["geography","الجغرافيا"]
+]
+};
+
+
+/*
+أسئلة تجريبية.
+سيتم لاحقًا ربطها مباشرة بكتب المنهج الموريتاني.
+*/
+
+const questions={
+
+math:[
+{t:"primary",l:"1",term:1,q:"كم يساوي 2 + 3 ؟",o:["4","5","6","7"],a:1},
+{t:"primary",l:"2",term:1,q:"كم يساوي 5 + 4 ؟",o:["7","8","9","10"],a:2},
+{t:"primary",l:"3",term:2,q:"كم يساوي 7 × 3 ؟",o:["18","21","24","27"],a:1},
+{t:"primary",l:"4",term:2,q:"كم يساوي 12 ÷ 3 ؟",o:["3","4","5","6"],a:1},
+{t:"middle",l:"1",term:1,q:"كم يساوي 5 × 6 ؟",o:["20","25","30","35"],a:2},
+{t:"middle",l:"2",term:2,q:"إذا كان x + 5 = 12، فما قيمة x؟",o:["5","6","7","8"],a:2},
+{t:"middle",l:"3",term:2,q:"ما قيمة 3² ؟",o:["6","8","9","12"],a:2},
+{t:"middle",l:"4",term:3,q:"ما قيمة √81 ؟",o:["7","8","9","10"],a:2},
+{t:"secondary",l:"5",term:1,q:"ما مشتقة الدالة f(x)=x²؟",o:["x","2x","x²","2"],a:1},
+{t:"secondary",l:"6",term:2,q:"إذا كان 2x = 10، فما قيمة x؟",o:["2","4","5","10"],a:2},
+{t:"secondary",l:"7",term:3,q:"ما قيمة log₁₀(100)؟",o:["1","2","10","100"],a:1}
+],
+
+arabic:[
+{t:"primary",l:"3",term:1,q:"ما نوع كلمة «كتاب»؟",o:["اسم","فعل","حرف","جملة"],a:0},
+{t:"middle",l:"1",term:1,q:"ما جمع كلمة «كتاب»؟",o:["كاتب","كتب","مكتوب","كتابة"],a:1},
+{t:"middle",l:"2",term:2,q:"ما نوع الجملة «العلم نور»؟",o:["فعلية","اسمية","استفهامية","أمر"],a:1},
+{t:"middle",l:"3",term:2,q:"ما ضد كلمة «سريع»؟",o:["قوي","بطيء","كبير","جميل"],a:1},
+{t:"secondary",l:"5",term:1,q:"ما إعراب كلمة «العلم» في «العلم نور»؟",o:["مفعول به","خبر","مبتدأ","حال"],a:2},
+{t:"secondary",l:"7",term:3,q:"ما الغرض الأساسي من التشبيه في البلاغة؟",o:["توضيح المعنى وتقريبه","حذف المعنى","إخفاء الفكرة","تغيير زمن الفعل"],a:0}
+],
+
+french:[
+{t:"primary",l:"4",term:1,q:"Quel est le pluriel de « livre » ?",o:["livres","livre","livrée","livrer"],a:0},
+{t:"middle",l:"1",term:1,q:"Quel est le contraire de « grand » ?",o:["petit","long","fort","haut"],a:0},
+{t:"middle",l:"2",term:2,q:"Choisissez le verbe : « Il ___ à l'école. »",o:["va","livre","maison","grand"],a:0},
+{t:"secondary",l:"5",term:2,q:"Quel est le passé composé de « manger » avec « il » ?",o:["Il mange","Il mangera","Il a mangé","Il mangeait"],a:2}
+],
+
+science:[
+{t:"primary",l:"4",term:1,q:"ما العضو الذي يضخ الدم في جسم الإنسان؟",o:["القلب","الرئة","المعدة","الكبد"],a:0},
+{t:"middle",l:"1",term:2,q:"ما الغاز الضروري للتنفس؟",o:["الأكسجين","النيتروجين","الهيدروجين","ثاني أكسيد الكربون"],a:0},
+{t:"middle",l:"3",term:3,q:"أين تحدث عملية البناء الضوئي في النبات؟",o:["الجذور","الأوراق","الثمار","البذور"],a:1}
+],
+
+history:[
+{t:"primary",l:"5",term:1,q:"ما العلم الذي يدرس أحداث الماضي؟",o:["الجغرافيا","التاريخ","الرياضيات","الفيزياء"],a:1},
+{t:"middle",l:"2",term:2,q:"ما الذي يدرسه علم التاريخ أساسًا؟",o:["أحداث الماضي","الكواكب فقط","الأرقام","النباتات"],a:0},
+{t:"secondary",l:"5",term:3,q:"ما المصدر الذي يعتمد عليه المؤرخ لدراسة الماضي؟",o:["المصادر التاريخية","المعادلات فقط","التجارب الكيميائية فقط","الطقس"],a:0}
+],
+
+geography:[
+{t:"primary",l:"5",term:1,q:"ماذا تدرس الجغرافيا؟",o:["سطح الأرض والظواهر المرتبطة به","الحساب فقط","اللغة فقط","الموسيقى"],a:0},
+{t:"middle",l:"2",term:2,q:"ما الخط الوهمي الذي يقسم الأرض إلى نصفين شمالي وجنوبي؟",o:["خط الاستواء","خط غرينتش","مدار السرطان","مدار الجدي"],a:0},
+{t:"secondary",l:"6",term:3,q:"ما الأداة التي تستخدم لتمثيل سطح الأرض بشكل مصغر؟",o:["الخريطة","الساعة","الميزان","المجهر"],a:0}
+]
+
+};
+
+
+
+let currentQuestions=[];
+let currentIndex=0;
+let correctAnswers=0;
+let selectedTerm=1;
+let selectedSubject="";
+let selectedCount=5;
+let usedQuestions=[];
+
+
+function updateLevels(){
+
+    const type=document.getElementById("levelType").value;
+    const level=document.getElementById("level");
+
+    level.innerHTML="";
+
+    levels[type].forEach(x=>{
+        const option=document.createElement("option");
+        option.value=x[0];
+        option.textContent=x[1];
+        level.appendChild(option);
+    });
+
+    updateSubjects();
+}
+
+
+function updateSubjects(){
+
+    const type=document.getElementById("levelType").value;
+    const subject=document.getElementById("subject");
+
+    subject.innerHTML="";
+
+    subjects[type].forEach(x=>{
+        const option=document.createElement("option");
+        option.value=x[0];
+        option.textContent=x[1];
+        subject.appendChild(option);
+    });
+}
+
+
+async function startQuiz(){
+
+    const type=document.getElementById("levelType").value;
+    const level=document.getElementById("level").value;
+    selectedSubject=document.getElementById("subject").value;
+    selectedTerm=Number(document.getElementById("term").value);
+
+    const countValue=document.getElementById("questionCount").value;
+
+    selectedCount=countValue==="infinite"
+        ? Infinity
+        : Number(countValue);
+
+    currentQuestions=[];
+    currentIndex=0;
+    correctAnswers=0;
+    usedQuestions=[];
+
+    const notice=document.getElementById("notice");
+
+    notice.style.display="none";
+
+    document.getElementById("setup").style.display="none";
+    document.getElementById("result").style.display="none";
+    document.getElementById("quiz").style.display="block";
+
+    await loadNextQuestion(type,level);
+}
+
+
+async function loadNextQuestion(type,level){
+
+    const questionText=document.getElementById("questionText");
+
+    questionText.textContent="⏳ جاري توليد سؤال جديد...";
+
+    document.getElementById("options").innerHTML="";
+
+    try{
+
+        let question=null;
+
+        const apiUrl =
+            "/api/quiz/question?subject=" +
+            encodeURIComponent(selectedSubject) +
+            "&stage=" +
+            encodeURIComponent(type) +
+            "&level=" +
+            encodeURIComponent(level) +
+            "&term=" +
+            encodeURIComponent(selectedTerm);
+
+        // نحاول الحصول على سؤال جديد لا يشبه الأسئلة السابقة
+        for(let attempt=0;attempt<8;attempt++){
+
+            const response=await fetch(apiUrl);
+
+            const data=await response.json();
+
+            if(!data.success){
+                throw new Error(data.error || "تعذر توليد السؤال");
+            }
+
+            const q=data.question;
+
+            const key=q.question.trim();
+
+            if(!usedQuestions.includes(key)){
+                question=q;
+                usedQuestions.push(key);
+                break;
+            }
+        }
+
+        if(!question){
+
+            // إذا انتهت الأسئلة المختلفة، نسمح بإعادة التوليد
+            const response=await fetch(apiUrl);
+
+            const data=await response.json();
+
+            if(!data.success){
+                throw new Error(data.error || "تعذر توليد السؤال");
+            }
+
+            question=data.question;
+
+            usedQuestions.push(question.question.trim());
+        }
+
+        currentQuestions.push(question);
+
+        showQuestion(question);
+
+    }catch(error){
+
+        console.error(error);
+
+        document.getElementById("quiz").style.display="none";
+        document.getElementById("setup").style.display="block";
+
+        const notice=document.getElementById("notice");
+
+        notice.textContent=
+            "⚠️ تعذر توليد سؤال من كتب المنهج. تأكد من وجود نصوص الكتب في book_texts.";
+
+        notice.style.display="block";
+    }
+}
+
+
+function showQuestion(q){
+
+    const numberText =
+        selectedCount===Infinity
+        ? "السؤال "+(currentIndex+1)+" ♾️"
+        : "السؤال "+(currentIndex+1)+" من "+selectedCount;
+
+    document.getElementById("questionNumber").textContent=numberText;
+
+    let difficulty="سهل";
+
+    if(selectedTerm===2){
+        difficulty="متوسط";
+    }
+
+    if(selectedTerm===3){
+        difficulty="صعب";
+    }
+
+    document.getElementById("difficulty").textContent=
+        "🎯 مستوى الصعوبة: "+difficulty;
+
+    document.getElementById("questionText").textContent=q.question;
+
+    const options=document.getElementById("options");
+
+    options.innerHTML="";
+
+    q.options.forEach((text,index)=>{
+
+        const button=document.createElement("button");
+
+        button.className="option";
+        button.textContent=text;
+
+        button.onclick=()=>checkAnswer(index);
+
+        options.appendChild(button);
+    });
+}
+
+
+async function checkAnswer(index){
+
+    const q=currentQuestions[currentIndex];
+
+    const buttons=document.querySelectorAll("#options .option");
+
+    // منع الضغط أكثر من مرة
+    buttons.forEach(button=>{
+        button.disabled=true;
+    });
+
+    if(index===q.answer){
+        correctAnswers++;
+    }
+
+    currentIndex++;
+
+    // الوضع اللانهائي
+    if(selectedCount===Infinity){
+
+        await loadNextQuestion(
+            document.getElementById("levelType").value,
+            document.getElementById("level").value
+        );
+
+        return;
+    }
+
+    // الاختبار المحدد العدد
+    if(currentIndex>=selectedCount){
+
+        finishQuiz();
+        return;
+    }
+
+    await loadNextQuestion(
+        document.getElementById("levelType").value,
+        document.getElementById("level").value
+    );
+}
+
+
+function finishQuiz(){
+
+    document.getElementById("quiz").style.display="none";
+    document.getElementById("result").style.display="block";
+
+    const total=currentQuestions.length;
+
+    const score=total
+        ? Math.round((correctAnswers/total)*20)
+        : 0;
+
+    document.getElementById("score").textContent=
+        score+" / 20";
+
+    let message;
+
+    if(score>=18){
+        message="🌟 ممتاز جدًا! أداء رائع.";
+    }else if(score>=15){
+        message="👏 أحسنت! نتيجتك جيدة جدًا.";
+    }else if(score>=10){
+        message="👍 جيد، واصل المراجعة.";
+    }else{
+        message="📚 لا بأس، راجع الدرس وحاول مرة أخرى.";
+    }
+
+    document.getElementById("resultMessage").textContent=message;
+}
+
+
+function restartQuiz(){
+
+    document.getElementById("result").style.display="none";
+    document.getElementById("quiz").style.display="none";
+    document.getElementById("setup").style.display="block";
+
+    currentQuestions=[];
+    currentIndex=0;
+    correctAnswers=0;
+    usedQuestions=[];
+}
+
+
+document.addEventListener("DOMContentLoaded",updateLevels);
+
+</script>
+
+</body>
+</html>

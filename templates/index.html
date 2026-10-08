@@ -1,0 +1,397 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Study AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: #1e293b;
+        }
+
+        header h1 {
+            font-size: 38px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #cbd5e1;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            padding: 30px 20px;
+        }
+
+        .search {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .search input {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+
+        .search button {
+            border: none;
+            border-radius: 12px;
+            padding: 0 25px;
+            background: #2563eb;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+        }
+
+        .card {
+            display: block;
+            text-decoration: none;
+            color: white;
+            background: #1e293b;
+            padding: 25px;
+            border-radius: 18px;
+            text-align: center;
+            transition: 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            background: #334155;
+        }
+
+        .icon {
+            font-size: 45px;
+            margin-bottom: 12px;
+        }
+
+        .card h2 {
+            margin: 8px 0;
+            font-size: 20px;
+        }
+
+        .card p {
+            color: #cbd5e1;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🤖 Study AI</h1>
+<p id="welcomeText">ماذا تريد أن تتعلم اليوم؟</p>
+</header>
+
+<div class="container">
+
+    <form class="search" action="/search" method="get">
+        <input
+            type="text"
+            name="q"
+            placeholder="🔎 ابحث عن درس أو مادة..."
+        >
+
+        <button type="submit">
+            بحث
+        </button>
+    </form>
+
+    <div class="cards">
+
+        <!-- المساعد الذكي -->
+        <a class="card" href="/chat">
+            <div class="icon">🤖</div>
+            <h2>المساعد الذكي</h2>
+            <p>اسأل Study AI</p>
+        </a>
+
+        <!-- الدروس -->
+        <a class="card" href="/lessons">
+            <div class="icon">📚</div>
+            <h2>الدروس</h2>
+            <p>تصفح الكتب والدروس</p>
+        </a>
+
+        <!-- الاختبارات -->
+        <a class="card" href="/quizzes">
+            <div class="icon">📝</div>
+            <h2>الاختبارات</h2>
+            <p>اختبر معلوماتك</p>
+        </a>
+
+        <!-- نتائج المسابقات الموريتانية -->
+        <a class="card" href="/results">
+            <div class="icon">🏆</div>
+            <h2>نتائج المسابقات الموريتانية</h2>
+            <p>تابع نتائج المسابقات والامتحانات</p>
+        </a>
+
+        <!-- الإعدادات -->
+        <a class="card" href="/settings">
+            <div class="icon">⚙️</div>
+            <h2>الإعدادات</h2>
+            <p>خصص تجربة Study AI</p>
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>
+
+<style>
+.countdown-box {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 25px;
+    border-radius: 20px;
+    text-align: center;
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    color: white;
+    box-shadow: 0 8px 25px rgba(0,0,0,.15);
+}
+
+.countdown-box h2 {
+    margin-bottom: 10px;
+}
+
+.countdown-title {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.countdown-timer {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.countdown-unit {
+    min-width: 90px;
+    padding: 15px 10px;
+    background: rgba(255,255,255,.15);
+    border-radius: 14px;
+}
+
+.countdown-number {
+    display: block;
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.countdown-label {
+    font-size: 14px;
+}
+
+.countdown-started {
+    font-size: 24px;
+    font-weight: bold;
+}
+</style>
+
+<div class="countdown-box" id="countdownBox">
+    <h2>📢 الإعلانات الرسمية</h2>
+    <div id="countdownList"></div>
+</div>
+
+<style>
+.countdown-box {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 25px;
+    border-radius: 20px;
+    text-align: center;
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    color: white;
+}
+
+.countdown-item {
+    background: rgba(255,255,255,.12);
+    margin: 15px 0;
+    padding: 20px;
+    border-radius: 16px;
+}
+
+.countdown-item h3 {
+    margin-top: 0;
+}
+
+.countdown-timer {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.countdown-unit {
+    min-width: 75px;
+    padding: 10px;
+    background: rgba(255,255,255,.15);
+    border-radius: 12px;
+}
+
+.countdown-number {
+    display: block;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.countdown-label {
+    font-size: 13px;
+}
+
+.started {
+    font-size: 22px;
+    font-weight: bold;
+}
+</style>
+
+<script>
+async function loadCountdowns() {
+    try {
+        const response = await fetch("/api/countdown");
+        const countdowns = await response.json();
+
+        const list = document.getElementById("countdownList");
+
+        if (!countdowns.length) {
+            list.innerHTML = `
+                <div class="countdown-item">
+                    لا توجد إعلانات حاليًا.
+                </div>
+            `;
+            return;
+        }
+
+        list.innerHTML = countdowns.map(item => `
+            <div class="countdown-item" data-target="${item.target_datetime}">
+                <h3>${escapeHtml(item.title)}</h3>
+
+                <div class="countdown-timer">
+                    <div class="countdown-unit">
+                        <span class="countdown-number days">0</span>
+                        <span class="countdown-label">يوم</span>
+                    </div>
+
+                    <div class="countdown-unit">
+                        <span class="countdown-number hours">0</span>
+                        <span class="countdown-label">ساعة</span>
+                    </div>
+
+                    <div class="countdown-unit">
+                        <span class="countdown-number minutes">0</span>
+                        <span class="countdown-label">دقيقة</span>
+                    </div>
+
+                    <div class="countdown-unit">
+                        <span class="countdown-number seconds">0</span>
+                        <span class="countdown-label">ثانية</span>
+                    </div>
+                </div>
+            </div>
+        `).join("");
+
+        updateAllCountdowns();
+
+    } catch (error) {
+        console.error("Countdown error:", error);
+    }
+}
+
+function updateAllCountdowns() {
+    document.querySelectorAll(".countdown-item[data-target]").forEach(item => {
+
+        const target = new Date(item.dataset.target).getTime();
+        let difference = target - Date.now();
+
+        const daysElement = item.querySelector(".days");
+        const hoursElement = item.querySelector(".hours");
+        const minutesElement = item.querySelector(".minutes");
+        const secondsElement = item.querySelector(".seconds");
+
+        if (difference <= 0) {
+            daysElement.textContent = "0";
+            hoursElement.textContent = "0";
+            minutesElement.textContent = "0";
+            secondsElement.textContent = "0";
+
+            item.querySelector(".countdown-timer").innerHTML =
+                '<div class="started">🚀 بدأ الموعد الآن!</div>';
+
+            return;
+        }
+
+        const days = Math.floor(
+            difference / (1000 * 60 * 60 * 24)
+        );
+
+        difference %= 1000 * 60 * 60 * 24;
+
+        const hours = Math.floor(
+            difference / (1000 * 60 * 60)
+        );
+
+        difference %= 1000 * 60 * 60;
+
+        const minutes = Math.floor(
+            difference / (1000 * 60)
+        );
+
+        difference %= 1000 * 60;
+
+        const seconds = Math.floor(
+            difference / 1000
+        );
+
+        daysElement.textContent = days;
+        hoursElement.textContent = hours;
+        minutesElement.textContent = minutes;
+        secondsElement.textContent = seconds;
+    });
+}
+
+function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+loadCountdowns();
+
+setInterval(updateAllCountdowns, 1000);
+
+setInterval(loadCountdowns, 2000);
+</script>
+

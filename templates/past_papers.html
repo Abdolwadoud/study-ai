@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>مواضيع السنوات السابقة - Study AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #101827;
+            color: white;
+        }
+
+        .container {
+            width: min(100% - 30px, 900px);
+            margin: auto;
+            padding: 30px 0 50px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 30px;
+        }
+
+        header p {
+            color: #b8c3d6;
+        }
+
+        .year {
+            background: #1d293d;
+            border: 1px solid #2c3b55;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .year h2 {
+            margin-top: 0;
+            color: #93c5fd;
+        }
+
+        .papers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .paper {
+            background: #26344b;
+            border-radius: 14px;
+            padding: 16px;
+            text-decoration: none;
+            color: white;
+            display: block;
+            transition: .2s;
+        }
+
+        .paper:hover {
+            background: #30415d;
+            transform: translateY(-2px);
+        }
+
+        .pdf {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 45px 20px;
+            background: #1d293d;
+            border-radius: 20px;
+            color: #b8c3d6;
+        }
+
+        .back {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            color: #93c5fd;
+            text-decoration: none;
+            font-size: 17px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>📝 مواضيع السنوات السابقة</h1>
+        <p>مواضيع المسابقات الموريتانية بصيغة PDF مرتبة حسب السنة</p>
+    </header>
+
+    {% if years %}
+
+        {% for year in years %}
+
+            <section class="year">
+
+                <h2>📅 سنة {{ year.name }}</h2>
+
+                {% if year.files %}
+
+                    <div class="papers">
+
+                        {% for file in year.files %}
+
+                            <a class="paper"
+                               href="{{ url_for('open_past_paper',
+                               year=year.name,
+                               filename=file.name) }}"
+                               target="_blank">
+
+                                <div class="pdf">📄</div>
+
+                                <strong>{{ file.name }}</strong>
+
+                                <div>
+                                    فتح ملف PDF
+                                </div>
+
+                            </a>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="empty">
+                        لا توجد مواضيع مضافة لهذه السنة حاليًا.
+                    </div>
+
+                {% endif %}
+
+            </section>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="empty">
+            <div style="font-size:50px;">📚</div>
+
+            <h2>لم تتم إضافة المواضيع بعد</h2>
+
+            <p>
+                أضف ملفات PDF داخل مجلد
+                <strong>past_papers</strong>
+                ثم ضع كل ملف داخل مجلد السنة الخاصة به.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+    <a class="back" href="/competitions">
+        🏆 العودة إلى المسابقات الموريتانية
+    </a>
+
+</div>
+
+</body>
+</html>
