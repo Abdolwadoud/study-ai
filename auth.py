@@ -80,6 +80,8 @@ def init_db():
     """)
 
     admin_email = os.getenv("STUDY_ADMIN_EMAIL", "").strip().lower()
+    admin_password = os.getenv("STUDY_ADMIN_PASSWORD", "")
+
     if admin_email:
         admin_user = conn.execute(
             "SELECT id FROM users WHERE lower(email) = ?",
@@ -91,15 +93,31 @@ def init_db():
                 "UPDATE users SET is_admin = 1 WHERE id = ?",
                 (admin_user["id"],)
             )
-            print("STUDY_ADMIN_EMAIL: تم العثور على الحساب وتفعيل صلاحية المسؤول.")
+            print("تم تفعيل صلاحية المسؤول للحساب المحدد.")
         else:
-            count = conn.execute(
+            user_count = conn.execute(
                 "SELECT COUNT(*) FROM users"
             ).fetchone()[0]
-            print(
-                "STUDY_ADMIN_EMAIL: الحساب غير موجود في قاعدة البيانات الحالية؛ "
-                f"عدد الحسابات المسجل: {count}"
-            )
+
+            if user_count == 0 and len(admin_password) >= 12:
+                conn.execute(
+                    """
+                    INSERT INTO users
+                    (email, phone, password_hash, verified, created_at,
+                     is_suspended, is_admin)
+                    VALUES (?, NULL, ?, 1, ?, 0, 1)
+                    """,
+                    (
+                        admin_email,
+                        generate_password_hash(admin_password),
+                        datetime.now(timezone.utc).isoformat()
+                    )
+                )
+                print("تم إنشاء حساب المسؤول الأول.")
+            elif user_count == 0:
+                print("قاعدة البيانات فارغة؛ كلمة مرور المسؤول غير موجودة أو أقصر من 12 حرفًا.")
+            else:
+                print("الحساب المحدد غير موجود؛ لم يتم إنشاء حساب جديد لأن قاعدة البيانات تحتوي على حسابات.")
 
     conn.commit()
     conn.close()
