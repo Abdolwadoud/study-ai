@@ -203,7 +203,7 @@ def register():
         """
         INSERT INTO users
         (email, phone, password_hash, verified, created_at)
-        VALUES (?, ?, ?, 0, ?)
+        VALUES (?, ?, ?, 1, ?)
         """,
         (
             email or None,
@@ -218,18 +218,10 @@ def register():
     conn.commit()
     conn.close()
 
-    sent = send_otp(
-        user_id,
-        email=email or None,
-        phone=phone or None
-    )
+    session.pop("verify_user_id", None)
+    session["user_id"] = user_id
 
-    if not sent:
-        flash("تعذر إرسال رمز التحقق. تحقق من إعدادات البريد.")
-
-    session["verify_user_id"] = user_id
-
-    return redirect(url_for("auth.verify"))
+    return redirect(url_for("home"))
 
 
 # =========================
@@ -339,25 +331,10 @@ def login():
         flash("كلمة المرور غير صحيحة.")
         return redirect(url_for("auth.login"))
 
-    if not user["verified"]:
-        session["verify_user_id"] = user["id"]
-
-        sent = send_otp(
-            user["id"],
-            email=user["email"],
-            phone=user["phone"]
-        )
-
-        if sent:
-            flash("تم إرسال رمز التحقق إلى بريدك الإلكتروني.")
-        else:
-            flash("تعذر إرسال رمز التحقق. تحقق من إعدادات البريد.")
-
-        return redirect(url_for("auth.verify"))
-
+    session.pop("verify_user_id", None)
     session["user_id"] = user["id"]
 
-    return redirect(url_for("auth.account"))
+    return redirect(url_for("home"))
 
 
 # =========================
