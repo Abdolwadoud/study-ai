@@ -285,37 +285,37 @@ def settings():
 # =========================
 
 def load_books():
-
     books = {}
 
-    if not os.path.exists(TEXT_FOLDER):
+    if not os.path.isdir(TEXT_FOLDER):
         return books
 
-    for filename in os.listdir(TEXT_FOLDER):
+    # قراءة ملفات TXT من المجلد الرئيسي وجميع المجلدات الفرعية
+    for root, dirs, filenames in os.walk(TEXT_FOLDER):
+        for filename in filenames:
+            if not filename.lower().endswith(".txt"):
+                continue
 
-        if not filename.lower().endswith(".txt"):
-            continue
+            path = os.path.join(root, filename)
+            relative_path = os.path.relpath(path, TEXT_FOLDER)
 
-        path = os.path.join(TEXT_FOLDER, filename)
+            try:
+                with open(
+                    path,
+                    "r",
+                    encoding="utf-8",
+                    errors="ignore"
+                ) as file:
+                    text = file.read()
 
-        try:
-            with open(
-                path,
-                "r",
-                encoding="utf-8",
-                errors="ignore"
-            ) as file:
+                if text.strip():
+                    books[relative_path] = text
 
-                text = file.read()
+            except Exception as error:
+                print("خطأ في قراءة:", path)
+                print(error)
 
-            if text.strip():
-                books[filename] = text
-
-        except Exception as error:
-
-            print("خطأ في قراءة:", filename)
-            print(error)
-
+    print(f"📚 عدد الكتب النصية المحمّلة: {len(books)}")
     return books
 
 
