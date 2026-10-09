@@ -29,6 +29,29 @@ chat_memory = {}
 # الصفحات
 # =========================
 
+@app.before_request
+def block_suspended_sessions():
+    user_id = session.get("user_id")
+    if user_id is None:
+        return None
+
+    from auth import get_db
+    conn = get_db()
+    user = conn.execute(
+        "SELECT is_suspended FROM users WHERE id = ?",
+        (user_id,)
+    ).fetchone()
+    conn.close()
+
+    if user and user["is_suspended"]:
+        session.clear()
+        if request.endpoint == "auth.login":
+            return None
+        return redirect(url_for("auth.login"))
+
+    return None
+
+
 @app.route("/")
 def home():
     from auth import get_db
@@ -1589,11 +1612,10 @@ def admin_countdown():
     if "user_id" not in session:
         return redirect(url_for("auth.login"))
 
-    import sqlite3
+    from auth import get_db
     from countdown_db import get_countdowns, add_countdown
 
-    conn = sqlite3.connect("users.db")
-    conn.row_factory = sqlite3.Row
+    conn = get_db()
 
     user = conn.execute(
         "SELECT is_admin FROM users WHERE id = ?",
@@ -1627,11 +1649,10 @@ def admin_countdown_delete(countdown_id):
     if "user_id" not in session:
         return redirect(url_for("auth.login"))
 
-    import sqlite3
+    from auth import get_db
     from countdown_db import delete_countdown
 
-    conn = sqlite3.connect("users.db")
-    conn.row_factory = sqlite3.Row
+    conn = get_db()
 
     user = conn.execute(
         "SELECT is_admin FROM users WHERE id = ?",
@@ -1661,22 +1682,154 @@ def admin_dashboard():
     if "user_id" not in session:
         return redirect(url_for("auth.login"))
 
-    import sqlite3
+    from auth import get_db
+    from datetime import datetime, timedelta, timezone
 
-    conn = sqlite3.connect("users.db")
-    conn.row_factory = sqlite3.Row
-
-    user = conn.execute(
+    conn = get_db()
+    admin = conn.execute(
         "SELECT is_admin FROM users WHERE id = ?",
         (session["user_id"],)
     ).fetchone()
 
-    conn.close()
-
-    if not user or not user["is_admin"]:
+    if not admin or not admin["is_admin"]:
+        conn.close()
         return "غير مصرح لك بالدخول", 403
 
-    return render_template("admin.html")
+    cutoff = (
+        datetime.now(timezone.utc) - timedelta(minutes=2)
+    ).isoformat()
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS site_activity (
+            visitor_key TEXT PRIMARY KEY,
+            last_seen TEXT NOT NULL
+        )
+    """)
+
+    online_count = conn.execute(
+        "SELECT COUNT(*) FROM site_activity WHERE last_seen >= ?",
+        (cutoff,)
+    ).fetchone()[0]
+
+    rows = conn.execute("""
+        SELECT id, email, phone, verified, created_at,
+               is_admin, is_suspended
+        FROM users
+        ORDER BY id DESC
+    """).fetchall()
+
+    online_rows = conn.execute(
+        "SELECT visitor_key FROM site_activity WHERE last_seen >= ?",
+        (cutoff,)
+    ).fetchall()
+    online_ids = {
+        int(r["visitor_key"][5:])
+        for r in online_rows
+        if r["visitor_key"].startswith("user:")
+        and r["visitor_key"][5:].isdigit()
+    }
+
+    accounts = [{
+        "id": r["id"],
+        "contact": r["email"] or r["phone"] or "غير متوفر",
+        "verified": bool(r["verified"]),
+        "created_at": r["created_at"],
+        "is_admin": bool(r["is_admin"]),
+        "suspended": bool(r["is_suspended"]),
+        "online": r["id"] in online_ids
+    } for r in rows]
+
+    conn.close()
+    return render_template(
+        "admin.html",
+        online_count=online_count,
+        total_users=len(accounts),
+        verified_count=sum(a["verified"] for a in accounts),
+        suspended_count=sum(a["suspended"] for a in accounts),
+        accounts=accounts
+    )
+
+
+@app.route("/admin/accounts/<int:target_id>/toggle", methods=["POST"])
+def toggle_account_suspension(target_id):
+    if "user_id" not in session:
+        return redirect(url_for("auth.login"))
+
+    from auth import get_db
+    conn = get_db()
+
+    admin = conn.execute(
+        "SELECT is_admin FROM users WHERE id = ?",
+        (session["user_id"],)
+    ).fetchone()
+
+    if not admin or not admin["is_admin"]:
+        conn.close()
+        return "غير مصرح لك بالدخول", 403
+
+    target = conn.execute(
+        "SELECT id, is_admin, is_suspended FROM users WHERE id = ?",
+        (target_id,)
+    ).fetchone()
+
+    if not target:
+        conn.close()
+        return "الحساب غير موجود", 404
+
+    if target["is_admin"]:
+        conn.close()
+        return "لا يمكن إيقاف حساب مسؤول من هذه اللوحة.", 403
+
+    new_status = 0 if target["is_suspended"] else 1
+    conn.execute(
+        "UPDATE users SET is_suspended = ? WHERE id = ?",
+        (new_status, target_id)
+    )
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("admin_dashboard"))
+
+
+
+@app.route("/admin/accounts/<int:target_id>/verification", methods=["POST"])
+def toggle_account_verification(target_id):
+    if "user_id" not in session:
+        return redirect(url_for("auth.login"))
+
+    from auth import get_db
+    conn = get_db()
+
+    admin = conn.execute(
+        "SELECT is_admin FROM users WHERE id = ?",
+        (session["user_id"],)
+    ).fetchone()
+
+    if not admin or not admin["is_admin"]:
+        conn.close()
+        return "غير مصرح لك بالدخول", 403
+
+    target = conn.execute(
+        "SELECT id, verified FROM users WHERE id = ?",
+        (target_id,)
+    ).fetchone()
+
+    if not target:
+        conn.close()
+        return "الحساب غير موجود", 404
+
+    new_status = 0 if target["verified"] else 1
+
+    conn.execute(
+        "UPDATE users SET verified = ? WHERE id = ?",
+        (new_status, target_id)
+    )
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("admin_dashboard"))
+
+
 if __name__ == "__main__":
 
     print()

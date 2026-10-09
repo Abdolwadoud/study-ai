@@ -39,3 +39,11 @@ templates/*before_fix*.html
 templates/*.htm
 templates/*backup*.html
 templates/*before_fix*.html
+
+# Local backups and temporary files
+*.before_*
+*.before_*.html
+*.tar.gz
+failed_pdf_list.txt
+users.db*
+countdown.db*

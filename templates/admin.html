@@ -1,128 +1,110 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم الأدمن - Study AI</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f7fb;
-            color: #222;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 20px;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 35px;
-        }
-
-        .admin-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-        }
-
-        .admin-card {
-            background: white;
-            border-radius: 18px;
-            padding: 30px 20px;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-            transition: 0.2s;
-        }
-
-        .admin-card:hover {
-            transform: translateY(-4px);
-        }
-
-        .icon {
-            font-size: 45px;
-            margin-bottom: 15px;
-        }
-
-        .admin-card h2 {
-            margin: 10px 0;
-        }
-
-        .admin-card p {
-            color: #666;
-            min-height: 45px;
-        }
-
-        .admin-card a {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 12px 22px;
-            border-radius: 10px;
-            background: #2563eb;
-            color: white;
-            text-decoration: none;
-        }
-
-        .back {
-            display: block;
-            text-align: center;
-            margin-top: 30px;
-            color: #555;
-            text-decoration: none;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>إدارة Study AI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f6fb;color:#172033}
+.container{max-width:1200px;margin:25px auto;padding:16px}
+h1{text-align:center}
+.subtitle{text-align:center;color:#64748b}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin:25px 0}
+.card{background:#fff;padding:20px;border-radius:15px;box-shadow:0 3px 14px #0000000c}
+.stat{text-align:center}
+.stat strong{display:block;font-size:30px;color:#2563eb;margin:10px}
+.table-wrap{overflow-x:auto;background:#fff;border-radius:14px}
+table{width:100%;border-collapse:collapse;min-width:780px}
+th,td{text-align:right;padding:12px;border-bottom:1px solid #e5e7eb}
+th{background:#eaf0fa}
+.badge{display:inline-block;padding:6px 10px;border-radius:20px;font-size:13px;font-weight:bold}
+.yes{background:#dcfce7;color:#166534}
+.no{background:#fee2e2;color:#991b1b}
+.neutral{background:#e2e8f0;color:#334155}
+button{border:0;border-radius:8px;padding:9px 12px;cursor:pointer;font-weight:bold}
+.stop{background:#fee2e2;color:#991b1b}
+.activate{background:#dcfce7;color:#166534}
+.links a{display:inline-block;margin:8px;color:#2563eb}
+.small{font-size:13px;color:#64748b}
+.back{display:block;text-align:center;margin:25px}
+</style>
 </head>
-
 <body>
-
 <div class="container">
+<h1>🛠️ لوحة إدارة Study AI</h1>
+<p class="subtitle">إحصائيات الموقع وإدارة حالة الحسابات</p>
 
-    <h1>🛠️ لوحة تحكم الأدمن</h1>
-    <div class="subtitle">
-        إدارة Study AI
-    </div>
-
-    <div class="admin-grid">
-
-        <div class="admin-card">
-            <div class="icon">📊</div>
-            <h2>رفع النتائج</h2>
-            <p>رفع وإدارة نتائج المسابقات والامتحانات.</p>
-            <a href="{{ url_for('admin_results') }}">
-                فتح إدارة النتائج
-            </a>
-        </div>
-
-        <div class="admin-card">
-            <div class="icon">⏳</div>
-            <h2>الإعلانات والعدّ التنازلي</h2>
-            <p>إضافة وحذف الإعلانات والمواعيد المهمة.</p>
-            <a href="{{ url_for('admin_countdown') }}">
-                إدارة الإعلانات
-            </a>
-        </div>
-
-    </div>
-
-    <a class="back" href="{{ '/' }}">
-        ← العودة إلى Study AI
-    </a>
-
+<div class="stats">
+<div class="card stat">🌐 المتصلون الآن<strong>{{ online_count }}</strong><span class="small">نشاط خلال دقيقتين</span></div>
+<div class="card stat">👥 الحسابات<strong>{{ total_users }}</strong></div>
+<div class="card stat">✅ الحسابات الموثقة<strong>{{ verified_count }}</strong></div>
+<div class="card stat">⛔ الحسابات الموقوفة<strong>{{ suspended_count }}</strong></div>
 </div>
 
+<div class="card">
+<h2>📋 الحسابات</h2>
+<p class="small">لا يمكن إيقاف حسابات المسؤولين من هذه اللوحة.</p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>رقم</th><th>البريد أو الهاتف</th><th>التوثيق</th>
+<th>حالة الحساب</th><th>الاتصال</th><th>تاريخ التسجيل</th><th>الإجراء</th>
+</tr>
+</thead>
+<tbody>
+{% for account in accounts %}
+<tr>
+<td>{{ account.id }}</td>
+<td>{{ account.contact }}</td>
+<td>
+{% if account.verified %}
+<span class="badge yes">✓ موثّق</span>
+{% else %}
+<span class="badge no">✗ غير موثّق</span>
+{% endif %}
+</td>
+<td>
+{% if account.suspended %}
+<span class="badge no">موقوف</span>
+{% else %}
+<span class="badge yes">نشط</span>
+{% endif %}
+{% if account.is_admin %}
+<br><span class="badge neutral">مسؤول</span>
+{% endif %}
+</td>
+<td>{{ "متصل" if account.online else "غير متصل" }}</td>
+<td>{{ account.created_at }}</td>
+<td>
+{% if account.is_admin %}
+<span class="small">حساب مسؤول محمي</span>
+{% else %}
+<form method="post" action="{{ url_for('toggle_account_suspension', target_id=account.id) }}" onsubmit="return confirm('هل تريد تغيير حالة هذا الحساب؟');">
+{% if account.suspended %}
+<button class="activate" type="submit">إعادة التفعيل</button>
+{% else %}
+<button class="stop" type="submit">إيقاف الحساب</button>
+{% endif %}
+</form>
+{% endif %}
+</td>
+</tr>
+{% else %}
+<tr><td colspan="7">لا توجد حسابات.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="card links" style="margin-top:20px">
+<h3>إدارة الموقع</h3>
+<a href="{{ url_for('admin_results') }}">إدارة النتائج</a>
+<a href="{{ url_for('admin_countdown') }}">الإعلانات والعد التنازلي</a>
+<a href="/">العودة إلى الموقع</a>
+</div>
+</div>
 </body>
 </html>

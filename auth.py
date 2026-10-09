@@ -6,6 +6,7 @@ import requests
 import re
 import sqlite3
 import secrets
+from database import get_connection
 import smtplib
 from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
@@ -29,9 +30,27 @@ DB_FILE = os.path.join(BASE_DIR, "users.db")
 
 
 def get_db():
-    conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row
-    return conn
+    return get_connection(DB_FILE)
+
+
+def _table_columns(conn, table):
+    if conn.postgres:
+        rows = conn.execute(
+            """
+            SELECT column_name AS name
+            FROM information_schema.columns
+            WHERE table_schema = current_schema()
+              AND table_name = ?
+            """,
+            (table,)
+        ).fetchall()
+    else:
+        # أسماء الجداول هنا ثابتة ومحددة داخل التطبيق.
+        rows = conn.execute(
+            f"PRAGMA table_info({table})"
+        ).fetchall()
+
+    return {row["name"] for row in rows}
 
 
 def init_db():
@@ -49,21 +68,14 @@ def init_db():
         )
     """)
 
-    columns = {
-        row["name"]
-        for row in conn.execute("PRAGMA table_info(users)").fetchall()
-    }
+    columns = _table_columns(conn, "users")
     if "is_suspended" not in columns:
         conn.execute(
             "ALTER TABLE users ADD COLUMN is_suspended INTEGER DEFAULT 0"
         )
 
     # ترحيل آمن لقواعد البيانات القديمة
-    columns = {
-        row["name"]
-        for row in conn.execute("PRAGMA table_info(users)").fetchall()
-    }
-
+    columns = _table_columns(conn, "users")
     if "is_admin" not in columns:
         conn.execute(
             "ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0"
@@ -260,21 +272,34 @@ def register():
         flash("هذا الحساب موجود بالفعل.")
         return redirect(url_for("auth.login"))
 
-    cursor = conn.execute(
-        """
-        INSERT INTO users
-        (email, phone, password_hash, verified, created_at)
-        VALUES (?, ?, ?, 1, ?)
-        """,
-        (
-            email or None,
-            phone or None,
-            generate_password_hash(password),
-            datetime.now(timezone.utc).isoformat()
-        )
+    user_values = (
+        email or None,
+        phone or None,
+        generate_password_hash(password),
+        datetime.now(timezone.utc).isoformat()
     )
 
-    user_id = cursor.lastrowid
+    if conn.postgres:
+        cursor = conn.execute(
+            """
+            INSERT INTO users
+            (email, phone, password_hash, verified, created_at)
+            VALUES (?, ?, ?, 1, ?)
+            RETURNING id
+            """,
+            user_values
+        )
+        user_id = cursor.fetchone()[0]
+    else:
+        cursor = conn.execute(
+            """
+            INSERT INTO users
+            (email, phone, password_hash, verified, created_at)
+            VALUES (?, ?, ?, 1, ?)
+            """,
+            user_values
+        )
+        user_id = cursor.lastrowid
 
     conn.commit()
     conn.close()
