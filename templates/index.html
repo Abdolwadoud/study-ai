@@ -13,17 +13,41 @@
             box-sizing: border-box;
         }
 
+        :root {
+            color-scheme: light;
+            --page-bg: #f1f5f9;
+            --panel-bg: #ffffff;
+            --text-color: #0f172a;
+            --muted-color: #475569;
+            --hover-bg: #e2e8f0;
+            --input-bg: #ffffff;
+            --input-border: #cbd5e1;
+        }
+
+        body.dark {
+            color-scheme: dark;
+            --page-bg: #0f172a;
+            --panel-bg: #1e293b;
+            --text-color: #f8fafc;
+            --muted-color: #cbd5e1;
+            --hover-bg: #334155;
+            --input-bg: #1e293b;
+            --input-border: #475569;
+        }
+
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background: #0f172a;
-            color: white;
+            background: var(--page-bg);
+            color: var(--text-color);
+            transition: background 0.2s, color 0.2s;
         }
 
         header {
             text-align: center;
             padding: 40px 20px;
-            background: #1e293b;
+            background: var(--panel-bg);
+            color: var(--text-color);
         }
 
         header h1 {
@@ -32,7 +56,7 @@
         }
 
         header p {
-            color: #cbd5e1;
+            color: var(--muted-color);
             font-size: 18px;
         }
 
@@ -50,10 +74,17 @@
 
         .search input {
             flex: 1;
+            min-width: 0;
             padding: 15px;
-            border: none;
+            border: 1px solid var(--input-border);
             border-radius: 12px;
             font-size: 16px;
+            background: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        .search input::placeholder {
+            color: var(--muted-color);
         }
 
         .search button {
@@ -75,8 +106,8 @@
         .card {
             display: block;
             text-decoration: none;
-            color: white;
-            background: #1e293b;
+            color: var(--text-color);
+            background: var(--panel-bg);
             padding: 25px;
             border-radius: 18px;
             text-align: center;
@@ -85,7 +116,7 @@
 
         .card:hover {
             transform: translateY(-5px);
-            background: #334155;
+            background: var(--hover-bg);
         }
 
         .icon {
@@ -99,8 +130,18 @@
         }
 
         .card p {
-            color: #cbd5e1;
+            color: var(--muted-color);
             margin: 0;
+        }
+
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 30px;
+            }
+
+            .search button {
+                padding: 0 16px;
+            }
         }
     </style>
 </head>
@@ -184,6 +225,20 @@ setInterval(refreshOnlineCount, 30000);
     </div>
 
 </div>
+
+    <script src="/static/js/preferences.js"></script>
+    <script src="/static/js/home-i18n.js"></script>
+
+    <!-- من نحن -->
+    <section id="about-study-ai" style="max-width:600px;margin:30px auto;padding:20px;text-align:center;border-radius:16px;border:1px solid #ddd;">
+        <h2>من نحن</h2>
+        <p>للاستفسار أو الإبلاغ عن مشكلة، يُرجى التواصل معنا عبر منصة واتساب على الرقم:</p>
+        <p dir="ltr" style="font-size:20px;font-weight:bold;">31612866</p>
+        <a href="https://wa.me/31612866" target="_blank" rel="noopener noreferrer"
+           style="display:inline-block;padding:12px 22px;background:#25D366;color:white;text-decoration:none;border-radius:10px;">
+            تواصل معنا عبر واتساب
+        </a>
+    </section>
 
 </body>
 </html>

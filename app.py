@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, jsonify, send_from_directory,
 import os
 import re
 import requests
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlparse, parse_qs, unquote
+import html as html_lib
 from auth import auth
 app = Flask(__name__)
 
@@ -1174,6 +1175,10 @@ def search_books(question, books):
         reverse=True
     )
 
+    # لا نقبل مقطعًا ضعيف المطابقة
+    if results[0]["score"] < 10:
+        return None
+
     return results[0]
 
 
@@ -1189,15 +1194,8 @@ def search_web(question):
             + quote_plus(question)
         )
 
-        headers = {
-            "User-Agent": "StudyAI/1.0"
-        }
-
-        response = requests.get(
-            url,
-            headers=headers,
-            timeout=8
-        )
+        headers = {"User-Agent": "Mozilla/5.0 StudyAI/1.0"}
+        response = requests.get(url, headers=headers, timeout=8)
 
         if response.status_code != 200:
             return None
@@ -1209,7 +1207,6 @@ def search_web(question):
             html,
             re.S
         )
-
         snippets = re.findall(
             r'<a class="result__snippet"[^>]*>(.*?)</a>',
             html,
@@ -1221,20 +1218,35 @@ def search_web(question):
 
         def clean_html(value):
             value = re.sub(r"<[^>]+>", " ", value)
+            value = html_lib.unescape(value)
             value = re.sub(r"\s+", " ", value)
             return value.strip()
 
         output = []
 
         for i, item in enumerate(results[:5]):
-            link = item[0]
+            link = item[0].replace("&amp;", "&")
             title = clean_html(item[1])
+
+            # تحويل رابط DuckDuckGo الوسيط إلى الرابط الأصلي
+            if link.startswith("//"):
+                link = "https:" + link
+
+            parsed = urlparse(link)
+            if (
+                parsed.hostname
+                and parsed.hostname.endswith("duckduckgo.com")
+                and parsed.path == "/l/"
+            ):
+                original = parse_qs(parsed.query).get("uddg", [])
+                if original:
+                    link = original[0]
 
             snippet = ""
             if i < len(snippets):
                 snippet = clean_html(snippets[i])
 
-            if title:
+            if title and link.startswith(("https://", "http://")):
                 output.append({
                     "title": title,
                     "snippet": snippet,
@@ -1244,7 +1256,91 @@ def search_web(question):
         if not output:
             return None
 
-        return output
+        # ترتيب النتائج حسب الكلمات المرتبطة بالسؤال
+        stopwords = {
+            "ما", "ماذا", "هل", "من", "في", "على", "عن",
+            "إلى", "الى", "هو", "هي", "و", "أو", "او",
+            "كيف", "لماذا", "متى", "كم", "مع", "كان",
+            "the", "a", "an", "is", "are", "of", "in",
+            "to", "for", "what", "who", "when", "where",
+            "how", "why", "and", "or", "le", "la", "les",
+            "de", "des", "du", "un", "une", "et", "est"
+        }
+
+        def words(value):
+            value = value.lower()
+            value = re.sub(r"[^\w\s]", " ", value)
+            return {
+                word for word in value.split()
+                if len(word) > 1 and word not in stopwords
+            }
+
+        query_words = words(question)
+
+        def relevance(item):
+            title_words = words(item["title"])
+            snippet_words = words(item["snippet"])
+            all_words = title_words | snippet_words
+
+            title_matches = query_words & title_words
+            all_matches = query_words & all_words
+
+            score = (
+                len(title_matches) * 3
+                + len(query_words & snippet_words)
+            )
+
+            if query_words and query_words <= all_words:
+                score += 5
+
+            # تفضيل المصادر العلمية والتعليمية الموثوقة
+            domain = urlparse(item["url"]).hostname or ""
+            domain = domain.lower()
+
+            trusted_domains = (
+                "nasa.gov",
+                "nasainarabic.net",
+                "aljazeera.net",
+                "esa.int",
+                "space.com",
+                "scientificamerican.com",
+                "nationalgeographic.com",
+                "britannica.com",
+                "science.org",
+            )
+
+            if any(
+                domain == trusted or domain.endswith("." + trusted)
+                for trusted in trusted_domains
+            ):
+                score += 4
+
+            item["_relevance"] = score
+            item["_matches"] = len(all_matches)
+            return score
+
+        for item in output:
+            relevance(item)
+
+        output.sort(
+            key=lambda item: item["_relevance"],
+            reverse=True
+        )
+
+        # استبعاد النتائج التي لا تتطابق مع أي كلمة مهمة
+        if len(query_words) >= 2:
+            relevant = [
+                item for item in output
+                if item["_matches"] >= 2
+            ]
+            if relevant:
+                output = relevant
+
+        for item in output:
+            item.pop("_relevance", None)
+            item.pop("_matches", None)
+
+        return output[:5] or None
 
     except Exception as e:
         print("Web search error:", e)
@@ -1344,10 +1440,6 @@ def ask():
                         item["snippet"]
                     )
 
-                lines.append(
-                    "🔗 " + item["url"]
-                )
-
                 lines.append("")
 
             answer = "\n".join(lines)
@@ -1355,8 +1447,8 @@ def ask():
         else:
 
             answer = (
-                "🤔 لم أجد إجابة واضحة في المنهج "
-                "ولم أستطع العثور على نتيجة مناسبة في الإنترنت."
+                "🤔 لم أجد إجابة مناسبة في الكتب، "
+                "ولم أتمكن من العثور على نتائج مناسبة في الإنترنت."
             )
 
         remember(
@@ -1373,6 +1465,23 @@ def ask():
         search_question,
         result["text"]
     )
+
+    source = os.path.basename(
+        str(result.get("book") or "")
+    ) or "كتاب غير محدد"
+
+    if re.search(r"(?m)^📖 المصدر:", answer_text):
+        answer_text = re.sub(
+            r"(?m)^📖 المصدر:.*$",
+            lambda match: "📖 المصدر: " + source,
+            answer_text
+        )
+    else:
+        answer_text = (
+            answer_text.rstrip()
+            + "\n\n📖 المصدر: "
+            + source
+        )
 
     answer = (
         "🤖 بالتأكيد! إليك الإجابة:\n\n"
