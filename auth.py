@@ -381,14 +381,6 @@ def account():
         "account.html",
         user=user
     )
-    if not user:
-        session.clear()
-        return redirect(url_for("auth.login"))
-
-    return render_template(
-        "account.html",
-        user=user
-    )
 
 
 # =========================
