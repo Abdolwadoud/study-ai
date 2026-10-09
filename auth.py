@@ -23,7 +23,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 
 auth = Blueprint("auth", __name__)
-DB_FILE = "users.db"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_FILE = os.path.join(BASE_DIR, "users.db")
 
 
 def get_db():

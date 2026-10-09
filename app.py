@@ -12,9 +12,14 @@ app.secret_key = os.environ.get(
 )
 
 app.register_blueprint(auth)
-BOOKS_FOLDER = "books"
-TEXT_FOLDER = "book_texts"
-PAST_PAPERS_FOLDER = "past_papers"
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BOOKS_FOLDER = os.path.join(BASE_DIR, "books")
+TEXT_FOLDER = os.path.join(BASE_DIR, "book_texts")
+PAST_PAPERS_FOLDER = os.path.join(BASE_DIR, "past_papers")
+
+os.makedirs(BOOKS_FOLDER, exist_ok=True)
+
 
 chat_memory = {}
 
@@ -88,7 +93,7 @@ def lessons():
     # =========================
     primary_books = []
 
-    for filename in sorted(os.listdir(BOOKS_FOLDER)):
+    for filename in sorted(os.listdir(BOOKS_FOLDER)) if os.path.isdir(BOOKS_FOLDER) else []:
         file_path = os.path.join(BOOKS_FOLDER, filename)
 
         if os.path.isfile(file_path) and filename.lower().endswith(".pdf"):
