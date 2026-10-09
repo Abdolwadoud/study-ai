@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import os
+import requests
 import re
 import sqlite3
 import secrets
@@ -66,22 +67,18 @@ def create_otp():
 
 
 def send_email_otp(email, code):
-    smtp_host = os.getenv("SMTP_HOST")
-    smtp_port = int(os.getenv("SMTP_PORT", "587"))
-    smtp_user = os.getenv("SMTP_USER")
-    smtp_password = os.getenv("SMTP_PASSWORD")
+    api_key = os.getenv("RESEND_API_KEY")
+    from_email = os.getenv("RESEND_FROM_EMAIL")
 
-    if not all([smtp_host, smtp_user, smtp_password]):
+    if not api_key or not from_email:
+        print("EMAIL OTP ERROR: Missing Resend configuration")
         return False
 
-    message = EmailMessage()
-    message["Subject"] = "رمز التحقق - Study AI"
-    message["From"] = smtp_user
-    message["To"] = email
-    print("📧 OTP WILL BE SENT TO:", email)
-
-    message.set_content(
-        f"""مرحبًا بك في Study AI.
+    payload = {
+        "from": from_email,
+        "to": [email],
+        "subject": "رمز التحقق - Study AI",
+        "text": f"""مرحبًا بك في Study AI.
 
 رمز التحقق الخاص بك هو:
 
@@ -89,25 +86,35 @@ def send_email_otp(email, code):
 
 الرمز صالح لمدة 10 دقائق.
 
-إذا لم تطلب إنشاء هذا الحساب، تجاهل هذه الرسالة.
+إذا لم تطلب إنشاء هذا الحساب، فتجاهل هذه الرسالة.
 """
-    )
+    }
 
     try:
-        with smtplib.SMTP(smtp_host, smtp_port, timeout=15) as server:
-            server.ehlo()
-            server.starttls()
-            server.ehlo()
-            server.login(smtp_user, smtp_password)
-            server.send_message(message)
+        response = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            },
+            json=payload,
+            timeout=20
+        )
 
-        print("✅ EMAIL SENT SUCCESSFULLY TO:", email)
-        return True
+        if response.status_code in (200, 201):
+            print("EMAIL SENT SUCCESSFULLY TO:", email)
+            return True
 
-    except Exception as e:
-        print("❌ EMAIL OTP ERROR:", type(e).__name__, str(e))
+        print(
+            "EMAIL OTP ERROR: Resend HTTP",
+            response.status_code,
+            response.text[:500]
+        )
         return False
 
+    except requests.RequestException as e:
+        print("EMAIL OTP ERROR:", type(e).__name__, str(e))
+        return False
 
 def send_sms_otp(phone, code):
     return False
