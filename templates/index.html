@@ -112,6 +112,24 @@
 <p id="welcomeText">ماذا تريد أن تتعلم اليوم؟</p>
 </header>
 
+<div id="online-counter" style="display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:8px 14px;border-radius:999px;background:#0f172a;color:#e2e8f0;font-size:14px">
+    <span style="width:9px;height:9px;border-radius:50%;background:#22c55e;display:inline-block"></span>
+    <span>المتصلون الآن: <strong id="online-count">—</strong></span>
+</div>
+<script>
+async function refreshOnlineCount() {
+    try {
+        const response = await fetch("/api/online-count", {cache: "no-store"});
+        if (!response.ok) return;
+        const data = await response.json();
+        document.getElementById("online-count").textContent = data.online;
+    } catch (_) {}
+}
+refreshOnlineCount();
+setInterval(refreshOnlineCount, 30000);
+</script>
+
+
 <div class="container">
 
     <form class="search" action="/search" method="get">

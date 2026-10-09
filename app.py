@@ -30,7 +30,58 @@ chat_memory = {}
 
 @app.route("/")
 def home():
+    from auth import get_db
+    from datetime import datetime, timezone
+
+    visitor_key = session.get("user_id")
+    if visitor_key is None:
+        visitor_key = session.get("visitor_id")
+        if visitor_key is None:
+            import secrets
+            visitor_key = secrets.token_urlsafe(24)
+            session["visitor_id"] = visitor_key
+    else:
+        visitor_key = f"user:{visitor_key}"
+
+    now = datetime.now(timezone.utc).isoformat()
+    conn = get_db()
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS site_activity (
+            visitor_key TEXT PRIMARY KEY,
+            last_seen TEXT NOT NULL
+        )
+    """)
+    conn.execute("""
+        INSERT INTO site_activity (visitor_key, last_seen)
+        VALUES (?, ?)
+        ON CONFLICT(visitor_key)
+        DO UPDATE SET last_seen = excluded.last_seen
+    """, (str(visitor_key), now))
+    conn.commit()
+    conn.close()
+
     return render_template("index.html")
+
+
+@app.route("/api/online-count")
+def online_count():
+    from auth import get_db
+    from datetime import datetime, timedelta, timezone
+
+    cutoff = (datetime.now(timezone.utc) - timedelta(minutes=2)).isoformat()
+    conn = get_db()
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS site_activity (
+            visitor_key TEXT PRIMARY KEY,
+            last_seen TEXT NOT NULL
+        )
+    """)
+    count = conn.execute(
+        "SELECT COUNT(*) FROM site_activity WHERE last_seen >= ?",
+        (cutoff,)
+    ).fetchone()[0]
+    conn.close()
+    return jsonify({"online": count})
 
 
 @app.route("/chat")
