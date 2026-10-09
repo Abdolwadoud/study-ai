@@ -44,9 +44,30 @@ def init_db():
             phone TEXT UNIQUE,
             password_hash TEXT NOT NULL,
             verified INTEGER DEFAULT 0,
-            created_at TEXT NOT NULL
+            created_at TEXT NOT NULL,
+            is_suspended INTEGER DEFAULT 0
         )
     """)
+
+    columns = {
+        row["name"]
+        for row in conn.execute("PRAGMA table_info(users)").fetchall()
+    }
+    if "is_suspended" not in columns:
+        conn.execute(
+            "ALTER TABLE users ADD COLUMN is_suspended INTEGER DEFAULT 0"
+        )
+
+    # ترحيل آمن لقواعد البيانات القديمة
+    columns = {
+        row["name"]
+        for row in conn.execute("PRAGMA table_info(users)").fetchall()
+    }
+
+    if "is_admin" not in columns:
+        conn.execute(
+            "ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0"
+        )
 
     conn.execute("""
         CREATE TABLE IF NOT EXISTS otp_codes (
@@ -322,6 +343,10 @@ def login():
 
     if not user:
         flash("البريد أو رقم الهاتف غير موجود.")
+        return redirect(url_for("auth.login"))
+
+    if user["is_suspended"]:
+        flash("هذا الحساب موقوف حاليًا. تواصل مع إدارة الموقع.")
         return redirect(url_for("auth.login"))
 
     if not check_password_hash(
