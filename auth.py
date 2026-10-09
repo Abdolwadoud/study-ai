@@ -91,9 +91,15 @@ def init_db():
                 "UPDATE users SET is_admin = 1 WHERE id = ?",
                 (admin_user["id"],)
             )
-            print("تم التأكد من صلاحية المسؤول للحساب المحدد.")
+            print("STUDY_ADMIN_EMAIL: تم العثور على الحساب وتفعيل صلاحية المسؤول.")
         else:
-            print("STUDY_ADMIN_EMAIL: لم يُعثر على الحساب المحدد.")
+            count = conn.execute(
+                "SELECT COUNT(*) FROM users"
+            ).fetchone()[0]
+            print(
+                "STUDY_ADMIN_EMAIL: الحساب غير موجود في قاعدة البيانات الحالية؛ "
+                f"عدد الحسابات المسجل: {count}"
+            )
 
     conn.commit()
     conn.close()
