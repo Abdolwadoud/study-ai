@@ -79,6 +79,22 @@ def init_db():
         )
     """)
 
+    admin_email = os.getenv("STUDY_ADMIN_EMAIL", "").strip().lower()
+    if admin_email:
+        admin_user = conn.execute(
+            "SELECT id FROM users WHERE lower(email) = ?",
+            (admin_email,)
+        ).fetchone()
+
+        if admin_user:
+            conn.execute(
+                "UPDATE users SET is_admin = 1 WHERE id = ?",
+                (admin_user["id"],)
+            )
+            print("تم التأكد من صلاحية المسؤول للحساب المحدد.")
+        else:
+            print("STUDY_ADMIN_EMAIL: لم يُعثر على الحساب المحدد.")
+
     conn.commit()
     conn.close()
 
